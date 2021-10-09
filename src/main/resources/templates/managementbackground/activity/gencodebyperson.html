@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('左右互选组件')" />
+    <th:block th:include="include :: bootstrap-duallistbox-css" />
+</head>
+<body class="white-bg">
+<div class="btn-group-sm"  role="group" style="margin:1%;">
+    <a class="btn btn-success" onclick="returnto()"> 返回</a>
+    <!--<a class="btn btn-success" onclick="" > 移除</a>-->
+</div>
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <!--<div class="row">
+        <div class="form-group">
+            <label class="col-sm-3 control-label">生成数量：</label>
+            <div class="col-sm-8">
+                <input name="" id="codenum" class="form-control" type="text">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">识别码：</label>
+            <div class="col-sm-8">
+                <input name="" class="form-control" type="text" value="6">
+            </div>
+        </div>
+    </div>-->
+    <table id="bootstrap-table" class="table table-bordered table-hover">
+        <thead class="" style="">
+            <tr>
+                <th style="" data-field="name">
+                    <div class="th-inner ">生成数量</div>
+                    <div class="fht-cell"></div>
+                </th>
+                <th style="" data-field="objType">
+                    <div class="th-inner ">识别码</div>
+                    <div class="fht-cell"></div>
+                </th>
+                <th style="text-align: center; " data-field="3">
+                    <div class="th-inner ">操作</div>
+                    <div class="fht-cell"></div>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr data-index="1">
+                <td><input name="" id="codenum" class="form-control" type="text">
+                    <input name="" id="codenum1" class="form-control" type="text" style="display: none"></td>
+                <td><span class="">6</span></td>
+                <td style="text-align: center; ">
+                    <a class="btn btn-success" onclick="setcode()" > 生成投票码</a>
+                    <a class="btn btn-success" onclick="downcode()" > 查看</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<th:block th:include="include :: footer" />
+<th:block th:include="include :: bootstrap-duallistbox-js" />
+<script th:inline="javascript">
+    var activityId = [[${activityId}]];
+    var codenum = [[${codenum}]];
+    $(function(){
+        $("#codenum").val(codenum);
+        $("#codenum1").val(codenum);
+    })
+    //返回
+    function returnto(){
+        //window.history.back(-1);
+        rebackPage();
+    }
+
+    //生成二维码
+    function setcode(){
+        if($("#codenum").val() == ""){
+            $.modal.alertWarning("生成数量不能为空");
+            return false;
+        }
+        $.ajax({
+            url:ctx + 'managementbackground/activity/setcode',
+            type:'post',
+            data: {
+                "codetype":"3",
+                "codenum":$("#codenum").val(),
+                "rankid":"",
+                "deptid":"",
+                "actityid":activityId,
+            },
+            success:function(data){
+                if(data == "success"){
+                    $("#codenum1").val($("#codenum").val())
+                    $.modal.msgSuccess('生成成功');
+                }
+                //需要查询
+                //初始化表格
+                initTable();
+            }
+        })
+    }
+
+    //下载
+    function downcode(){
+        if($("#codenum1").val() == ""){
+            $.modal.alertWarning("未生成二维码不可查看")
+            return false;
+        }
+        var id = '000000';//无作用，占位
+        location.href = ctx+"managementbackground/activity/downcode?id="+id+"&codetype=3&activityId="+activityId;
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+	<head>
+		<meta charset="utf-8">
+		<title>在线测评</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+		<link th:href="@{/css/wnui.css}" rel="stylesheet"/>
+		<link th:href="@{/css/web.css}" rel="stylesheet"/>
+		<style type="text/css">
+			body {
+				background: #F3F5F8 url('../static/ceping/img/bg.png') no-repeat center top;
+				background-attachment:fixed;
+				background-size:100%;
+			}
+			li {
+				margin:15px 0; 
+			}
+		</style>
+	</head>
+	<body>
+			<div class="wap-wrap" style="height: 100vh; box-shadow: 0 0 8px #999; padding:0;">
+ 
+				<div class="head pd10">
+					<h1 th:text="${cpActivity.actName}"></h1>
+					<p class="pd10" th:text="${'活动说明：' + cpActivity.activityIllustrate}">
+					</p>
+					
+				</div> 
+				<hr> 
+				<div class="box pd15" >
+					<div class="hd">
+						<h3>需要填写以下表格</h3>
+					</div>
+					<div class="bd">
+						<li th:each="sheet:${sheetList}">
+							<div th:if="${#strings.isEmpty(bjSheetId)}">
+								<a href="javascript:void(0)" class="btn" th:onclick="toCpIndex([[${sheet.id}]],[[${sheet.objType}]])" th:text="${sheet.name}"></a>
+								<div style="float:right;margin-right:10%;">待填写</div>
+							</div>
+							<div th:if="${!#strings.isEmpty(bjSheetId) && bjSid == sheet.id}" th:each="bjSid:${bjSheetId}" >
+								<a href="javascript:void(0)" class="btn" th:text="${sheet.name}" style="background-color:#e1e0e0;border:1px solid #e1e0e0;"></a>
+								<div style="float:right;margin-right:10%;color:#c3bebe;">已完成</div>
+							</div>
+							<div th:if="${!#strings.isEmpty(bjSheetId) && bjSid != sheet.id}" th:each="bjSid:${bjSheetId}" >
+								<a href="javascript:void(0)" class="btn" th:onclick="toCpIndex([[${sheet.id}]],[[${sheet.objType}]])" th:text="${sheet.name}"></a>
+								<div style="float:right;margin-right:10%;">待填写</div>
+							</div>
+						</li>
+					</div>
+				</div>
+			</div>
+			<th:block th:include="include :: footer" />
+			<script th:inline="javascript">
+				var allParam = [[${allParam}]];
+				var sheetList = [[${sheetList}]];
+				var cpActivity = [[${cpActivity}]];
+
+				//为开启职级，并是职级制码，这码啥用？！
+				if(cpActivity.isnotRank == '0' && allParam.codeType == 'rank'){
+					$.modal.alertWarning("此活动未开启职级，此码无效！");
+				}else {
+					if(sheetList.length == 0) {
+						$.modal.alertWarning("该职级权限内没有测评表格，无法测评！");
+					}
+				}
+
+				//跳转检测首页
+				function toCpIndex(sheetId,objType){
+					allParam.sheetid = sheetId;
+					allParam.objtype = objType;
+					if(!isExitsTestObj()){
+						$.modal.alertWarning("此表格没有设置测评对象，无法进行测评");
+						return false;
+					}
+
+					var dataParam = jQuery.param(allParam);
+
+					// location.href = ctx + 'kp/toCpIndex?' + dataParam;
+					location.href = ctx + 'kp/toItemPage?' + dataParam;
+				}
+
+				//判断是否有测评对象
+				function isExitsTestObj(){
+					var flag = true;//默认存在测评对象
+					$.ajax({
+						type:"post",
+						url: ctx + "kp/selectTestObj",
+						data:allParam,
+						async:false,
+						success:function(data){
+							if(data != '0'){
+								flag = false;//不存在测评对象
+							}
+						}
+					})
+					return flag;
+				}
+
+			</script>
+
+		
+	</body>
+</html>

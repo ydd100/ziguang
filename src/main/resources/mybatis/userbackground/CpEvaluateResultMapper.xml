@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.userbackground.result.mapper.CpEvaluateResultMapper">
+    
+    <resultMap type="CpEvaluateResult" id="CpEvaluateResultResult">
+        <result property="evaluateResultId"    column="evaluate_result_id"    />
+        <result property="activityId"    column="activity_id"    />
+        <result property="columnDataId"    column="column_data_id"    />
+        <result property="evaluateItemId"    column="evaluate_item_id"    />
+        <result property="sheetId"    column="sheet_id"    />
+    </resultMap>
+
+    <sql id="selectCpEvaluateResultVo">
+        select evaluate_result_id, activity_id, column_data_id, evaluate_item_id, sheet_id from cp_evaluate_result
+    </sql>
+
+    <select id="selectCpEvaluateResultList" parameterType="CpEvaluateResult" resultMap="CpEvaluateResultResult">
+        <include refid="selectCpEvaluateResultVo"/>
+        <where>  
+            <if test="activityId != null "> and activity_id = #{activityId}</if>
+            <if test="columnDataId != null "> and column_data_id = #{columnDataId}</if>
+            <if test="evaluateItemId != null "> and evaluate_item_id = #{evaluateItemId}</if>
+            <if test="sheetId != null "> and sheet_id = #{sheetId}</if>
+        </where>
+    </select>
+
+    <select id="selectCpEvaluateResultByact" parameterType="Long" resultMap="CpEvaluateResultResult">
+        <include refid="selectCpEvaluateResultVo"/>
+        where activity_id = #{activityId}
+    </select>
+
+    <select id="selectCpEvaluateResultByEvaluateResultId" parameterType="Long" resultMap="CpEvaluateResultResult">
+        <include refid="selectCpEvaluateResultVo"/>
+        where evaluate_result_id = #{evaluateResultId}
+    </select>
+        
+    <insert id="insertCpEvaluateResult" parameterType="CpEvaluateResult" useGeneratedKeys="true" keyProperty="evaluateResultId">
+        insert into cp_evaluate_result
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="activityId != null">activity_id,</if>
+            <if test="columnDataId != null">column_data_id,</if>
+            <if test="evaluateItemId != null">evaluate_item_id,</if>
+            <if test="sheetId != null">sheet_id,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="activityId != null">#{activityId},</if>
+            <if test="columnDataId != null">#{columnDataId},</if>
+            <if test="evaluateItemId != null">#{evaluateItemId},</if>
+            <if test="sheetId != null">#{sheetId},</if>
+         </trim>
+    </insert>
+
+    <update id="updateCpEvaluateResult" parameterType="CpEvaluateResult">
+        update cp_evaluate_result
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="activityId != null">activity_id = #{activityId},</if>
+            <if test="columnDataId != null">column_data_id = #{columnDataId},</if>
+            <if test="evaluateItemId != null">evaluate_item_id = #{evaluateItemId},</if>
+            <if test="sheetId != null">sheet_id = #{sheetId},</if>
+        </trim>
+        where evaluate_result_id = #{evaluateResultId}
+    </update>
+
+    <delete id="deleteCpEvaluateResultByEvaluateResultId" parameterType="Long">
+        delete from cp_evaluate_result where evaluate_result_id = #{evaluateResultId}
+    </delete>
+
+
+    <delete id="deleteCpEvaluateResultByactId" parameterType="Long">
+        delete from cp_evaluate_result where activity_id = #{activityId}
+    </delete>
+
+    <delete id="deleteCpEvaluateResultByEvaluateResultIds" parameterType="String">
+        delete from cp_evaluate_result where evaluate_result_id in 
+        <foreach item="evaluateResultId" collection="array" open="(" separator="," close=")">
+            #{evaluateResultId}
+        </foreach>
+    </delete>
+
+</mapper>

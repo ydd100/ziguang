@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html  lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--360浏览器优先以webkit内核解析-->
+    <title>紫光介绍</title>
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href="../static/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link href="../static/css/font-awesome.min.css" th:href="@{/css/font-awesome.min.css}" rel="stylesheet"/>
+    <link href="../static/css/style.min.css" th:href="@{/css/style.min.css}" rel="stylesheet"/>
+</head>
+
+<body class="gray-bg">
+    <div class="row border-bottom white-bg dashboard-header">
+        <div class="col-sm-12">
+			<h3>内容统计</h3>
+			<hr>
+			<div style="height: 70px;margin: 1%;background-color: #f8f8f8;width: 22%;float: left">
+				<p style="margin: 2%;">模板数量</p>
+                <span style="font-size: 25px;color: #3c8dbc;margin-left: 43%;" id="moban"></span>
+			</div>
+			<div style="height: 70px;margin: 1%;background-color: #f8f8f8;width: 22%;float: left">
+                <p style="margin: 2%;">人员总数</p>
+                <span style="font-size: 25px;color: #3c8dbc;margin-left: 43%;" id="renyuan"></span>
+			</div>
+			<div style="height: 70px;margin: 1%;background-color: #f8f8f8;width: 22%;float: left">
+                <p style="margin: 2%;">当前测评</p>
+                <span style="font-size: 25px;color: #3c8dbc;margin-left: 43%;" id="pingce"></span>
+			</div>
+			<div style="height: 70px;margin: 1%;background-color: #f8f8f8;width: 22%;float: left">
+                <p style="margin: 2%;">当前时间</p>
+                <span style="font-size: 25px;color: #3c8dbc;margin-left: 10%;" id="newdate"></span>
+			</div>
+            <hr>
+        </div>
+    </div>
+<!--    <th:block th:include="include :: footer" />-->
+    <script th:src="@{/js/jquery.min.js}"></script>
+    <script th:src="@{/js/bootstrap.min.js}"></script>
+    <script th:src="@{/ajax/libs/layer/layer.min.js}"></script>
+    <script th:inline="javascript">
+        var ctx = [[@{/}]];
+        //初始化加载
+       $(function(){
+           //加载模板数量
+           $.ajax({
+               url:ctx +'managementbackground/template/list',
+               type:'post',
+               data:{},
+               success:function(data){
+                   debugger
+                   $("#moban").html(data.total);
+               },
+               error:function(){}
+           })
+           //加载人员
+           $.ajax({
+               url:ctx +'managementbackground/user/list',
+               type:'post',
+               data:{},
+               success:function(data){
+                   $("#renyuan").html(data.total);
+               },
+               error:function(){}
+           })
+           //加载测评
+           $.ajax({
+               url:ctx +'managementbackground/activity/list',
+               type:'post',
+               data:{},
+               success:function(data){
+                   $("#pingce").html(data.total);
+               },
+               error:function(){}
+           })
+           //当前时间
+           var date = new Date();
+
+           var year = date.getFullYear();        //年 ,从 Date 对象以四位数字返回年份
+           var month = date.getMonth() + 1;      //月 ,从 Date 对象返回月份 (0 ~ 11) ,date.getMonth()比实际月份少 1 个月
+           var day = date.getDate();             //日 ,从 Date 对象返回一个月中的某一天 (1 ~ 31)
+
+           var hours = date.getHours();          //小时 ,返回 Date 对象的小时 (0 ~ 23)
+           var minutes = date.getMinutes();      //分钟 ,返回 Date 对象的分钟 (0 ~ 59)
+           var seconds = date.getSeconds();      //秒 ,返回 Date 对象的秒数 (0 ~ 59)
+
+           //获取当前系统时间
+           var currentDate = year + "-" + month + "-" + day + " " + hours + ":" + minutes + ":" + seconds;
+           //修改月份格式
+           if (month >= 1 && month <= 9) {
+               month = "0" + month;
+           }
+           //修改日期格式
+           if (day >= 0 && day <= 9) {
+               day = "0" + day;
+           }
+           //修改小时格式
+           if (hours >= 0 && hours <= 9) {
+               hours = "0" + hours;
+           }
+           //修改分钟格式
+           if (minutes >= 0 && minutes <= 9) {
+               minutes = "0" + minutes;
+           }
+           //修改秒格式
+           if (seconds >= 0 && seconds <= 9) {
+               seconds = "0" + seconds;
+           }
+           //获取当前系统时间  格式(yyyy-mm-dd hh:mm:ss)
+           //var currentFormatDate = year + "-" + month + "-" + day + " " + hours + ":" + minutes + ":" + seconds;
+           //$("#newdate").html(currentFormatDate);
+
+           var currentFormatDate = year + "-" + month + "-" + day;
+           $("#newdate").html(currentFormatDate);
+       })
+    </script>
+</body>
+</html>

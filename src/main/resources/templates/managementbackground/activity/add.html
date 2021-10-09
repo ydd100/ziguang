@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('新增测评活动')" />
+    <th:block th:include="include :: datetimepicker-css" />
+</head>
+<body class="white-bg">
+    <div class="btn-group-sm"  role="group">
+        <a class="btn btn-success" onclick="returnto()" style="margin: 1%"> 返回</a>
+    </div>
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <div class="col-sm-12">
+            <div class="tabs-container">
+                <ul class="nav nav-tabs">
+                    <li class="active"><a data-toggle="tab" href="#tab-1" aria-expanded="true"> 基本信息</a>
+                    </li>
+                    <li class=""><a data-toggle="tab" href="#tab-2" aria-expanded="false" onclick="tab2()">测评表格</a>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div id="tab-1" class="tab-pane active">
+                        <div class="panel-body">
+                            <form class="form-horizontal m" id="form-activity-add">
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">名称：</label>
+                                    <div class="col-sm-8">
+                                        <input name="actName" class="form-control" type="text">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">活动说明：</label>
+                                    <div class="col-sm-8">
+                                        <textarea rows="3" name="activityIllustrate" class="form-control" type="text"></textarea>
+                                    </div>
+                                </div>
+                               <!-- <div class="form-group">
+                                    <label class="col-sm-3 control-label">模板id：</label>
+                                    <div class="col-sm-8">
+                                        <input name="templateId" class="form-control" type="text">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">发布人id：</label>
+                                    <div class="col-sm-8">
+                                        <input name="releaseId" class="form-control" type="text">
+                                    </div>
+                                </div>-->
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">发布人：</label>
+                                    <div class="col-sm-8">
+                                        <input name="releaseName" class="form-control" type="text">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">发布单位：</label>
+                                    <div class="col-sm-8">
+                                        <input name="releaseUnit" class="form-control" type="text">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">活动开始时间：</label>
+                                    <div class="col-sm-8">
+                                        <div class="input-group date">
+                                            <input name="activityBeginTime" class="form-control" placeholder="yyyy-MM-dd" type="text">
+                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">活动结束：</label>
+                                    <div class="col-sm-8">
+                                        <div class="input-group date">
+                                            <input name="activityEndTime" class="form-control" placeholder="yyyy-MM-dd" type="text">
+                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">状态：</label>
+                                    <div class="col-sm-8">
+                                        <div class="radio-box" th:each="dict : ${@dict.getType('actity_state')}">
+                                            <input type="radio" th:id="${'status_' + dict.dictCode}" name="status" th:value="${dict.dictValue}">
+                                            <label th:for="${'status_' + dict.dictCode}" th:text="${dict.dictLabel}"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">用户职级：</label>
+                                    <div class="col-sm-8">
+                                        <div class="radio-box" th:each="dict : ${@dict.getType('user_rank')}">
+                                            <input type="radio" th:id="${'isnotRank_' + dict.dictCode}" name="isnotRank" th:value="${dict.dictValue}" th:checked="${dict.default}">
+                                            <label th:for="${'isnotRank_' + dict.dictCode}" th:text="${dict.dictLabel}"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                            <div class="btn-group-sm" role="group">
+                                <a class="btn btn-success" onclick="addsave()"> 保存</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="tab-2" class="tab-pane">
+                        <div class="panel-body">
+                            <div class="col-sm-12 select-table table-striped">
+                                <table id="bootstrap-table"></table>
+                            </div>
+                            <div class="btn-group-sm" role="group">
+                                <a class="btn btn-success" onclick="addsavecp()"> 保存测评表格</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <th:block th:include="include :: footer" />
+    <th:block th:include="include :: datetimepicker-js" />
+    <script th:inline="javascript">
+        var prefix = ctx + "managementbackground/activity"
+        var sheetObjType = [[${@dict.getType('sheet_obj_type')}]];
+        var flag = "true";
+        $("#form-activity-add").validate({
+            focusCleanup: true
+        });
+
+        $("input[name='activityBeginTime']").datetimepicker({
+            format: "yyyy-mm-dd",
+            minView: "month",
+            autoclose: true
+        });
+
+        $("input[name='activityEndTime']").datetimepicker({
+            format: "yyyy-mm-dd",
+            minView: "month",
+            autoclose: true
+        });
+        //保存基本信息
+        function addsave() {
+            if ($.validate.form()) {
+                // $.operate.save(prefix + "/add", $('#form-activity-add').serialize());
+                var url = prefix + "/add";
+                var data = $('#form-activity-add').serialize();
+                var config = {
+                    url: url,
+                    type: "post",
+                    dataType: "json",
+                    data: data,
+                    beforeSend: function () {
+                        $.modal.loading("正在处理中，请稍后...");
+                        $.modal.disable();
+                    },
+                    success: function(result) {
+                        returnto();
+                    }
+                };
+                $.ajax(config)
+            }
+            flag = "false"
+        }
+        //返回
+        function returnto(){
+            location.href =  ctx + "managementbackground/activity";
+        }
+        //tab2的数据加载
+        function tab2(){
+            var options = {
+                url: ctx + "userbackground/evaluation/list",
+                modalName: "测评",
+                showSearch: false,
+                showRefresh: true,
+                showColumns: false,
+                showToggle: false,
+                columns: [{
+                    checkbox: true
+                },
+                    {
+                        field: 'id',
+                        title: '创建人',
+                        visible: false
+                    },
+                    {
+                        field: 'name',
+                        title: '名称',
+                        align: 'center',
+                    },
+                    /*{
+                        field: 'tableExplain',
+                        title: '填表说明'
+                    },*/
+                    {
+                        field: 'objType',
+                        title: '对象类型',
+                        formatter: function(value, row, index) {
+                            return $.table.selectDictLabel(sheetObjType, value);
+                        }
+                    },
+                    /*{
+                        field: 'evaType',
+                        title: '评价类型'
+                    },
+                    {
+                        field: 'coverPath',
+                        title: '封面图片'
+                    },
+                    {
+                        field: 'backPath',
+                        title: '背景图片'
+                    },
+                    {
+                        field: 'subjectPath',
+                        title: '主题'
+                    },
+                    {
+                        field: 'operateId',
+                        title: '创建人'
+                    },*/
+                    /*{
+                        title: '操作',
+                        align: 'center',
+                        formatter: function(value, row, index) {
+                            var actions = [];
+                            /!*actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(\'' + row.id + '\')"><i class="fa fa-edit"></i>编辑</a> ');
+                            actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');*!/
+                            actions.push('<a class="btn btn-success btn-xs"  onclick="yichu(\'' + row.id + '\')"> 移除</a> ');
+                            return actions.join('');
+                        }
+                    }*/
+                    ]
+            };
+            $.table.init(options);
+        }
+        //保存测评表格
+        function addsavecp() {
+            // var actid = $("#id").val();
+            if(flag == "true"){
+                $.modal.alertWarning("请先保存基本信息！！！")
+                return false;
+            }
+        }
+    </script>
+</body>
+</html>

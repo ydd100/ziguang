@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.userbackground.CpRankCodeSon.mapper.CpRankCodeSonMapper">
+    
+    <resultMap type="CpRankCodeSon" id="CpRankCodeSonResult">
+        <result property="id"    column="id"    />
+        <result property="rankCodeId"    column="rank_code_id"    />
+        <result property="rankId"    column="rank_id"    />
+        <result property="identifier"    column="identifier"    />
+        <result property="codeState"    column="code_state"    />
+        <result property="qrCodePath"    column="qr_code_path"    />
+    </resultMap>
+
+    <sql id="selectCpRankCodeSonVo">
+        select id, rank_code_id, rank_id, identifier, code_state, qr_code_path from cp_rank_code_son
+    </sql>
+
+    <select id="selectCpRankCodeSonList" parameterType="CpRankCodeSon" resultMap="CpRankCodeSonResult">
+        <include refid="selectCpRankCodeSonVo"/>
+        <where>  
+            <if test="rankCodeId != null  and rankCodeId != ''"> and rank_code_id = #{rankCodeId}</if>
+            <if test="rankId != null  and rankId != ''"> and rank_id = #{rankId}</if>
+            <if test="identifier != null  and identifier != ''"> and identifier = #{identifier}</if>
+            <if test="codeState != null  and codeState != ''"> and code_state = #{codeState}</if>
+            <if test="qrCodePath != null  and qrCodePath != ''"> and qr_code_path = #{qrCodePath}</if>
+        </where>
+    </select>
+    
+    <select id="selectCpRankCodeSonById" parameterType="String" resultMap="CpRankCodeSonResult">
+        <include refid="selectCpRankCodeSonVo"/>
+        where id = #{id}
+    </select>
+
+
+    <select id="selectCpRankCodeSonListbyrankCodeId" parameterType="String" resultMap="CpRankCodeSonResult">
+        <include refid="selectCpRankCodeSonVo"/>
+        where rank_code_id = #{rankCodeId}
+    </select>
+        
+    <insert id="insertCpRankCodeSon" parameterType="CpRankCodeSon">
+        insert into cp_rank_code_son
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="rankCodeId != null">rank_code_id,</if>
+            <if test="rankId != null">rank_id,</if>
+            <if test="identifier != null">identifier,</if>
+            <if test="codeState != null">code_state,</if>
+            <if test="qrCodePath != null">qr_code_path,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="rankCodeId != null">#{rankCodeId},</if>
+            <if test="rankId != null">#{rankId},</if>
+            <if test="identifier != null">#{identifier},</if>
+            <if test="codeState != null">#{codeState},</if>
+            <if test="qrCodePath != null">#{qrCodePath},</if>
+         </trim>
+    </insert>
+
+    <update id="updateCpRankCodeSon" parameterType="CpRankCodeSon">
+        update cp_rank_code_son
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="rankCodeId != null">rank_code_id = #{rankCodeId},</if>
+            <if test="rankId != null">rank_id = #{rankId},</if>
+            <if test="identifier != null">identifier = #{identifier},</if>
+            <if test="codeState != null">code_state = #{codeState},</if>
+            <if test="qrCodePath != null">qr_code_path = #{qrCodePath},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteCpRankCodeSonById" parameterType="String">
+        delete from cp_rank_code_son where id = #{id}
+    </delete>
+
+    <delete id="deleteCpRankCodeSonByIds" parameterType="String">
+        delete from cp_rank_code_son where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

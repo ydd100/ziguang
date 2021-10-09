@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.userbackground.CpOnePersonOneYard.mapper.CpOnePersonOneYardMapper">
+    
+    <resultMap type="CpOnePersonOneYard" id="CpOnePersonOneYardResult">
+        <result property="id"    column="id"    />
+        <result property="identifier"    column="identifier"    />
+        <result property="codeState"    column="code_state"    />
+        <result property="qrCodePath"    column="qr_code_path"    />
+        <result property="codeNum"    column="code_num"    />
+        <result property="actityId"    column="actity_id"    />
+    </resultMap>
+
+    <sql id="selectCpOnePersonOneYardVo">
+        select id, identifier, code_state, qr_code_path, code_num, actity_id from cp_one_person_one_yard
+    </sql>
+
+    <select id="selectCpOnePersonOneYardList" parameterType="CpOnePersonOneYard" resultMap="CpOnePersonOneYardResult">
+        <include refid="selectCpOnePersonOneYardVo"/>
+        <where>  
+            <if test="identifier != null  and identifier != ''"> and identifier = #{identifier}</if>
+            <if test="codeState != null  and codeState != ''"> and code_state = #{codeState}</if>
+            <if test="qrCodePath != null  and qrCodePath != ''"> and qr_code_path = #{qrCodePath}</if>
+            <if test="codeNum != null "> and code_num = #{codeNum}</if>
+            <if test="actityId != null "> and actity_id = #{actityId}</if>
+        </where>
+    </select>
+    
+    <select id="selectCpOnePersonOneYardById" parameterType="String" resultMap="CpOnePersonOneYardResult">
+        <include refid="selectCpOnePersonOneYardVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectCpOnePersonOneYardByActId" parameterType="Long" resultMap="CpOnePersonOneYardResult">
+        <include refid="selectCpOnePersonOneYardVo"/>
+        where actity_id = #{actityId}
+    </select>
+        
+    <insert id="insertCpOnePersonOneYard" parameterType="CpOnePersonOneYard">
+        insert into cp_one_person_one_yard
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="identifier != null">identifier,</if>
+            <if test="codeState != null">code_state,</if>
+            <if test="qrCodePath != null">qr_code_path,</if>
+            <if test="codeNum != null">code_num,</if>
+            <if test="actityId != null">actity_id,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="identifier != null">#{identifier},</if>
+            <if test="codeState != null">#{codeState},</if>
+            <if test="qrCodePath != null">#{qrCodePath},</if>
+            <if test="codeNum != null">#{codeNum},</if>
+            <if test="actityId != null">#{actityId},</if>
+         </trim>
+    </insert>
+
+    <update id="updateCpOnePersonOneYard" parameterType="CpOnePersonOneYard">
+        update cp_one_person_one_yard
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="identifier != null">identifier = #{identifier},</if>
+            <if test="codeState != null">code_state = #{codeState},</if>
+            <if test="qrCodePath != null">qr_code_path = #{qrCodePath},</if>
+            <if test="codeNum != null">code_num = #{codeNum},</if>
+            <if test="actityId != null">actity_id = #{actityId},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteCpOnePersonOneYardById" parameterType="String">
+        delete from cp_one_person_one_yard where id = #{id}
+    </delete>
+
+    <delete id="deleteCpOnePersonOneYardByIds" parameterType="String">
+        delete from cp_one_person_one_yard where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!-- 根据活动id统计个人生成票数 -->
+    <select id="selectCountCodeNumByActId" parameterType="Long" resultType="Map">
+        select actity_id,count(id) codeNum from cp_one_person_one_yard where actity_id=#{activityId} group by actity_id
+    </select>
+
+</mapper>

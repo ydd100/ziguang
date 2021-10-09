@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('新增用户')" />
+    <th:block th:include="include :: datetimepicker-css" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-user-add">
+            <div class="form-group">    
+                <label class="col-sm-3 control-label">姓名：</label>
+                <div class="col-sm-8">
+                    <input name="name" id="name" class="form-control" type="text">
+                </div>
+            </div>
+            <div class="form-group">    
+                <label class="col-sm-3 control-label">手机号：</label>
+                <div class="col-sm-8">
+                    <input name="phone" id="phone" class="form-control" type="text">
+                </div>
+            </div>
+            <div class="form-group">    
+                <label class="col-sm-3 control-label">身份证号：</label>
+                <div class="col-sm-8">
+                    <input name="idcard" class="form-control" type="text">
+                </div>
+            </div>
+            <div class="form-group">    
+                <label class="col-sm-3 control-label">性别：</label>
+                <div class="col-sm-8">
+                    <div class="radio-box" th:each="dict : ${@dict.getType('user_sex')}">
+                        <input type="radio" th:id="${'sex_' + dict.dictCode}" name="sex" th:value="${dict.dictValue}" th:checked="${dict.default}">
+                        <label th:for="${'sex_' + dict.dictCode}" th:text="${dict.dictLabel}"></label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label">单位：</label>
+                <div class="col-sm-8">
+                    <input name="unitName" class="form-control" type="text">
+                </div>
+            </div>
+            <div class="form-group">    
+                <label class="col-sm-3 control-label">职级：</label>
+                <div class="col-sm-8">
+                    <!--<input name="rankId" class="form-control" type="text">-->
+                    <select name="rankId" id="rankId" class="form-control">
+<!--                        <option>&#45;&#45;请选职级&#45;&#45;</option>-->
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label">部门：</label>
+                <div class="col-sm-8">
+                   <!-- <input name="deptId" class="form-control" type="text">-->
+                    <select name="deptId" id="deptId" class="form-control">
+<!--                        <option>&#45;&#45;请选部门&#45;&#45;</option>-->
+                    </select>
+                </div>
+            </div>
+           <!-- <div class="form-group">
+                <label class="col-sm-3 control-label">状态：</label>
+                <div class="col-sm-8">
+                    <div class="radio-box" th:each="dict : ${@dict.getType('data_state')}">
+                        <input type="radio" th:id="${'status_' + dict.dictCode}" name="status" th:value="${dict.dictValue}" th:checked="${dict.default}">
+                        <label th:for="${'status_' + dict.dictCode}" th:text="${dict.dictLabel}"></label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">    
+                <label class="col-sm-3 control-label">用户类型：</label>
+                <div class="col-sm-8">
+                    <select name="userType" class="form-control m-b" th:with="type=${@dict.getType('user_type')}">
+                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">    
+                <label class="col-sm-3 control-label">上次登录：</label>
+                <div class="col-sm-8">
+                    <div class="input-group date">
+                        <input name="lastLoginTime" class="form-control" placeholder="yyyy-MM-dd" type="text">
+                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                    </div>
+                </div>
+            </div>-->
+
+        </form>
+    </div>
+    <th:block th:include="include :: footer" />
+    <th:block th:include="include :: datetimepicker-js" />
+    <script th:inline="javascript">
+        var prefix = ctx + "managementbackground/user"
+        //初始化加载
+        $(function(){
+            //加载职级
+            $.ajax({
+                url:ctx + 'managementbackground/rank/list',
+                type:'post',
+                data:{},
+                success:function(data){
+                    console.log("职级：")
+                    for(var i=0;i<data.rows.length;i++){
+                        var sel = document.getElementById("rankId");
+                        var opt = document.createElement("option");
+                        var opt = new Option(data.rows[i].name,data.rows[i].id);//第一个代表标签内的内容，第二个代表value
+                        sel.options.add(opt);
+                    }
+                },
+                error:function(){}
+            })
+            //加载部门
+            $.ajax({
+                url:ctx +'managementbackground/dept/list',
+                type:'post',
+                data:{},
+                success:function(data){
+                    console.log("部门：")
+                    for(var i=0;i<data.rows.length;i++){
+                        var sel = document.getElementById("deptId");
+                        var opt = document.createElement("option");
+                        var opt = new Option(data.rows[i].name,data.rows[i].id);//第一个代表标签内的内容，第二个代表value
+                        sel.options.add(opt);
+                    }
+                },
+                error:function(){}
+            })
+        })
+
+        $("#form-user-add").validate({
+            rules:{
+                name:{
+                    required:true,
+                },
+                phone:{
+                    required:true,
+                },
+                rankId:{
+                    required:true,
+                },
+                deptId:{
+                    required:true,
+                }
+            },
+            messages:{
+                name:{
+                    required:'必填',
+                },
+                phone:{
+                    required:'必填',
+                },
+                rankId:{
+                    required:'必填',
+                },
+                deptId:{
+                    required:'必填',
+                }
+            }
+        });
+
+        function submitHandler() {
+            debugger
+            var str = $("#name").val();
+            var han = /^[\u4e00-\u9fa5]+$/;
+            if (!han.test(str)) {
+                $.modal.alertWarning("姓名只能是汉字！！");
+                return false;
+            };
+
+            var str1 = $("#phone").val();
+            var han1 = /^1([358][0-9]|4[579]|66|7[0135678]|9[89])[0-9]{8}$/;
+            if (!han1.test(str1)) {
+                $.modal.alertWarning("手机格式不对！！");
+                return false;
+            };
+            if ($.validate.form()) {
+                $.operate.save(prefix + "/add", $('#form-user-add').serialize());
+            }
+        }
+
+        $("input[name='lastLoginTime']").datetimepicker({
+            format: "yyyy-mm-dd",
+            minView: "month",
+            autoclose: true
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <!-- <th:block th:include="include :: header('测评表格列表')" /> -->
+    
+    <link th:href="@{/css/wnui.css}" rel="stylesheet"/>
+	<link th:href="@{/css/web.css}" rel="stylesheet"/>
+	<link th:href="@{/css/userbackground/btn-imp.css}" rel="stylesheet"/>
+    <title>在线测评</title>
+    <style type="text/css">
+    	body {
+				background: #F3F5F8 url() no-repeat center top;
+				background-attachment:fixed;
+				background-size:100%;
+			}
+		h3 {
+			margin-top:20px;
+		}
+		p {
+			font-size:14px;
+		}
+    </style>
+    
+</head>
+<body>
+     <div class="wrap wap-wrap tc" style="min-height: 100vh;">
+		<div class="k50"></div>
+		<img th:src="@{/img/icon-ok.png}" width="30%" alt="">
+		<div class="k20"></div>
+		<div class="k10"></div>
+		<h3>提交完成！</h3>
+		<div class="k20"></div>
+		<p>感谢您的参与！</p>
+		<div class="k50"></div>
+		<div class="k20"></div>
+		 
+		<div class="btn-wrap">
+			<!-- <a href="index.html" class="btn btn-lg wb20"> 返回 </a> -->
+			<button id="subjectPath" class="btn btn-lg wb20" onclick="rebackPrev()">返回</button>
+		</div>
+	</div>
+	
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+	    var cpSheet = [[${cpSheet}]];
+	    var sheetId = cpSheet.id;
+	    $("#subjectPath").addClass(cpSheet.subjectPath);
+		$('body').css({
+			'background': '#F3F5F8 url('+ctx+cpSheet.backPath+') no-repeat center top',
+			'background-attachment':'fixed',
+			'background-size':'100%',
+		})
+		
+		function rebackPrev(){
+			window.location = ctx + "userbackground/previewpage/cpPreview?sheetId="+sheetId;
+		}
+    </script>
+</body>
+</html>

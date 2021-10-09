@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>用户登录</title>
+	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"/>
+	<!--<link rel="stylesheet" href="css/wnui.css" media="all">
+	<link rel="stylesheet" href="css/login.css" media="all">-->
+	<link href="../static/ceping/css/login.css" th:href="@{/ceping/css/login.css}" rel="stylesheet"/>
+	<link href="../static/ceping/css/wnui.css" th:href="@{/ceping/css/wnui.css}" rel="stylesheet"/>
+	<script>
+		if(window.top!==window.self){alert('未登录或登录超时。请重新登录');window.top.location=window.location};
+	</script>
+</head>
+<body style="background-color: #538CF3;">
+<div class="loginWrapper c" style="margin-top: 12%">
+	<div class="banWrapper">
+		<div class="banContent">
+			<!--<img src="images/loginbanner3.png" >-->
+			<img src="../static/ceping/img/loginbanner3.png" th:src="@{/ceping/img/loginbanner3.png}">
+		</div>
+	</div>
+	<div class="loginMain">
+		<div class="loginbox">
+			<div class="loginLogoDiv">
+				<h2>紫光评测系统</h2>
+			</div>
+			<div class="login-title">
+				<h5>登录</h5>
+			</div>
+			<form id="signupForm" autocomplete="off" class="formLogin">
+				<div class="loginList loginListUser">
+					<input type="text" name="username" autocomplete="off" value="" class="loginText" title="帐号"  placeholder="帐号" >
+				</div>
+				<div class="loginList loginListPwd">
+					<input type="password" name="password"  autocomplete="off"  value="" class="loginText" placeholder="密码">						 											<i class="clearInput clearMobile" style=""></i>
+				</div>
+				<button class="btn loginBtn" id="btnSubmit" data-loading="正在验证登录，请稍后...">登录</button>
+				<!--<input class="btn loginBtn" type="button" id="btnSubmit" value="登录"   >-->
+			</form>
+		</div>
+	</div>
+</div>
+<script th:inline="javascript"> var ctx = [[@{/}]]; var captchaType = [[${captchaType}]]; </script>
+<!--[if lte IE 8]><script>window.location.href=ctx+'html/ie.html';</script><![endif]-->
+<!-- 全局js -->
+<script src="../static/js/jquery.min.js" th:src="@{/js/jquery.min.js}"></script>
+<script src="../static/ajax/libs/validate/jquery.validate.min.js" th:src="@{/ajax/libs/validate/jquery.validate.min.js}"></script>
+<script src="../static/ajax/libs/layer/layer.min.js" th:src="@{/ajax/libs/layer/layer.min.js}"></script>
+<script src="../static/ajax/libs/blockUI/jquery.blockUI.js" th:src="@{/ajax/libs/blockUI/jquery.blockUI.js}"></script>
+<script src="../static/ruoyi/js/ry-ui.js" th:src="@{/ruoyi/js/ry-ui.js?v=4.7.0}"></script>
+<script src="../static/ruoyi/login.js" th:src="@{/ruoyi/login.js}"></script>
+</body>
+</html>

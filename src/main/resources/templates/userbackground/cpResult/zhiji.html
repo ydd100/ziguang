@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+	<head>
+		<meta charset="utf-8">
+		<title>选择职级</title>
+		<link th:href="@{/css/wnui.css}" rel="stylesheet"/>
+		<link th:href="@{/css/web.css}" rel="stylesheet"/>
+		<style type="text/css">
+			.wap-wrap {
+				background-color: #fff;
+				box-shadow: 0 0 8px #ddd;
+				padding:0;
+				width: 600px;
+				margin:0 auto;
+			}
+			#div2 {
+				width: 300px;
+			}
+			@media screen and (max-width:767px) {
+				  .wap-wrap {
+				  	background-color: #fff;  
+				  	width: 100%; 
+				  }
+					 
+			}
+		</style>
+	</head>
+	<body>
+		<div class="wap-wrap" style="height: 100vh; box-shadow: 0 0 8px #999; padding:0;">
+
+				<div class="fc" id="div2">					
+					<p>选择您的职级：</p>
+					<div class="hd" style="padding: 20px 0;">
+						<ul>
+							<li th:each="rank:${rankList}">
+								<input type="radio" name="rankId" th:value="${rank.id}" th:title="${rank.name}"><span th:text="${rank.name}"></span>
+							</li>
+
+						</ul>
+					</div>
+					<div class="btn-wrap tc pd20">
+						<a  href="javascript:void(0)" class="btn brn-primary" onclick="selectSheetPage()" /> 选择好了，继续</a>
+					</div>
+				</div>
+		</div>
+		<th:block th:include="include :: footer" />
+		<script th:inline="javascript">
+			var allParam = [[${allParam}]];
+
+			function selectSheetPage() {
+				var rankCheckId = $("input[name=rankId]:checked").val();
+				if(isEmpty(rankCheckId)){
+					$.modal.alertWarning('请选择职级');
+					return false;
+				}
+				allParam.pageSelectRankId = rankCheckId;
+				var dataParam = jQuery.param(allParam);//转参数格式
+				location.href = ctx + 'kp/selectSheetPage?'+dataParam;
+			}
+		</script>
+		
+		
+	</body>
+</html>

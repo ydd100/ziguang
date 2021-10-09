@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+  <meta charset="utf-8">
+  <title>在线测评</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link th:href="@{/css/wnui.css}" rel="stylesheet"/>
+  <link th:href="@{/css/web.css}" rel="stylesheet"/>
+  <link th:href="@{/css/userbackground/btn-imp.css}" rel="stylesheet"/>
+  <style type="text/css">
+    h3 {
+      margin-top:20px;
+    }
+    p {
+      font-size:14px;
+    }
+  </style>
+</head>
+<body th:style="'background-image: url('+@{${cpSheet.backPath}}+')'" style="background-attachment:fixed;background-size:100%;">
+
+<div class="wap-wrap" style="height: 100vh; box-shadow: 0 0 8px #999; padding:0;">
+  <div class="banner">
+   <!-- <img th:src="@{/}+${cpSheet.coverPath}" alt="">-->
+    <img th:src="@{${cpSheet.coverPath}}" alt="">
+  </div>
+  <div class="head pd10">
+    <h1 th:text="${cpSheet.name}"></h1>
+  </div>
+  <div class="ind-main">
+    <h3>填表说明：</h3>
+    <p class="" th:text="${cpSheet.tableExplain}">
+
+    </p>
+  </div>
+  <div class="wap-foot tc">
+    <button id="subjectPath" class="btn btn-lg" onclick="startCp()">开始测评</button>
+  </div>
+</div>
+<th:block th:include="include :: footer" />
+<script th:inline="javascript">
+  var allParam = [[${allParam}]];
+  var cpSheet = [[${cpSheet}]];
+  var sheetId = cpSheet.id;
+  $("#subjectPath").addClass(cpSheet.subjectPath);
+
+  function startCp() {
+    var dataParam = jQuery.param(allParam);
+    location.href = ctx + 'kp/toItemPage?' + dataParam;
+  }
+</script>
+
+</body>
+</html>

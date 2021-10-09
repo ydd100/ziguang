@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.userbackground.CpRankCode.mapper.CpRankCodeMapper">
+    
+    <resultMap type="CpRankCode" id="CpRankCodeResult">
+        <result property="id"    column="id"    />
+        <result property="deptId"    column="dept_id"    />
+        <result property="deptName"    column="dept_name"    />
+        <result property="groupName"    column="group_name"    />
+        <result property="identifierNum"    column="identifier_num"    />
+        <result property="codeNum"    column="code_num"    />
+        <result property="actityId"    column="actity_id"    />
+        <result property="rankId"    column="rank_id"    />
+        <result property="scanningTimes"    column="scanning_times"    />
+    </resultMap>
+
+    <sql id="selectCpRankCodeVo">
+        select id, dept_id, dept_name, group_name, identifier_num, code_num, actity_id,rank_id,scanning_times from cp_rank_code
+    </sql>
+
+    <select id="selectCpRankCodeList" parameterType="CpRankCode" resultMap="CpRankCodeResult">
+        <include refid="selectCpRankCodeVo"/>
+        <where>  
+            <if test="deptId != null  and deptId != ''"> and dept_id = #{deptId}</if>
+            <if test="deptName != null  and deptName != ''"> and dept_name like concat('%', #{deptName}, '%')</if>
+            <if test="groupName != null  and groupName != ''"> and group_name like concat('%', #{groupName}, '%')</if>
+            <if test="identifierNum != null "> and identifier_num = #{identifierNum}</if>
+            <if test="codeNum != null "> and code_num = #{codeNum}</if>
+            <if test="actityId != null "> and actity_id = #{actityId}</if>
+            <if test="scanningTimes != null "> and scanning_times = #{scanningTimes}</if>
+        </where>
+    </select>
+
+
+    <select id="selectCpRankCodeByAllId" parameterType="CpRankCode" resultMap="CpRankCodeResult">
+        <include refid="selectCpRankCodeVo"/>
+        where dept_id = #{deptId} and actity_id = #{actityId} and rank_id = #{rankId}
+    </select>
+
+    
+    <select id="selectCpRankCodeById" parameterType="String" resultMap="CpRankCodeResult">
+        <include refid="selectCpRankCodeVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertCpRankCode" parameterType="CpRankCode">
+        insert into cp_rank_code
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="deptId != null">dept_id,</if>
+            <if test="deptName != null">dept_name,</if>
+            <if test="groupName != null">group_name,</if>
+            <if test="identifierNum != null">identifier_num,</if>
+            <if test="codeNum != null">code_num,</if>
+            <if test="actityId != null">actity_id,</if>
+            <if test="rankId != null">rank_id,</if>
+            <if test="scanningTimes != null">scanning_times,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="deptId != null">#{deptId},</if>
+            <if test="deptName != null">#{deptName},</if>
+            <if test="groupName != null">#{groupName},</if>
+            <if test="identifierNum != null">#{identifierNum},</if>
+            <if test="codeNum != null">#{codeNum},</if>
+            <if test="actityId != null">#{actityId},</if>
+            <if test="rankId != null">#{rankId},</if>
+            <if test="scanningTimes != null">#{scanningTimes},</if>
+         </trim>
+    </insert>
+
+    <update id="updateCpRankCode" parameterType="CpRankCode">
+        update cp_rank_code
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="deptId != null">dept_id = #{deptId},</if>
+            <if test="deptName != null">dept_name = #{deptName},</if>
+            <if test="groupName != null">group_name = #{groupName},</if>
+            <if test="identifierNum != null">identifier_num = #{identifierNum},</if>
+            <if test="codeNum != null">code_num = #{codeNum},</if>
+            <if test="actityId != null">actity_id = #{actityId},</if>
+            <if test="rankId != null">rank_id = #{rankId},</if>
+            <if test="scanningTimes != null">scanning_times = #{scanningTimes},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteCpRankCodeById" parameterType="String">
+        delete from cp_rank_code where id = #{id}
+    </delete>
+
+    <delete id="deleteCpRankCodeByIds" parameterType="String">
+        delete from cp_rank_code where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="selectrankbydeptidandactid" parameterType="CpRankCode" resultMap="CpRankCodeResult">
+        <include refid="selectCpRankCodeVo"/>
+        where dept_id = #{deptId} and actity_id = #{actityId}
+    </select>
+
+    <!-- 根据活动ID，部门ID，职级ID能确定唯一数据 -->
+    <select id="selectCpRankCodeByAidDidRid" parameterType="CpRankCode" resultMap="CpRankCodeResult">
+        <include refid="selectCpRankCodeVo"/>
+        where dept_id = #{deptId} and actity_id = #{actityId} and rank_id=#{rankId}
+    </select>
+
+    <!-- 查询投票概况 -->
+    <select id="selectVotesStatusByActId" parameterType="Long" resultType="Map">
+        select rc.id,rc.dept_id deptId,rc.dept_name deptName,rc.rank_id rankId,r.name rankName,
+               rc.code_num codeNum,rc.scanning_times scanningTimes,(rc.code_num - rc.scanning_times) oddTimes
+        from cp_rank_code rc left join cp_rank r on rc.rank_id = r.id
+        where rc.actity_id = #{actityId} order by rc.dept_id
+    </select>
+
+    <!-- 根据活动id统计职级生成票数 -->
+    <select id="selectSumCodeNumByActId" parameterType="Long" resultType="Map">
+        select actity_id,sum(code_num) codeNum from cp_rank_code where actity_id=#{activityId} group by actity_id
+    </select>
+
+    <!-- 根据活动id删除职级制码数据 -->
+    <delete id="deleteCpRankCodeByActId" parameterType="CpRankCode">
+        delete from cp_rank_code where actity_id=#{actityId} and dept_id = #{deptId}
+    </delete>
+
+</mapper>

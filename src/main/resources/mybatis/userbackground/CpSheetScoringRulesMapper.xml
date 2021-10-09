@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.userbackground.rules.mapper.CpSheetScoringRulesMapper">
+    
+    <resultMap type="CpSheetScoringRules" id="CpSheetScoringRulesResult">
+        <result property="id"    column="id"    />
+        <result property="sheetId"    column="sheet_id"    />
+        <result property="deptId"    column="dept_id"    />
+        <result property="rankId"    column="rank_id"    />
+        <result property="groupName"    column="group_name"    />
+        <result property="fraction"    column="fraction"    />
+        <result property="sheetType"    column="sheet_type"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="activityId"    column="activity_id"    />
+    </resultMap>
+
+    <sql id="selectCpSheetScoringRulesVo">
+        select id, sheet_id, dept_id, rank_id, group_name, fraction, sheet_type, create_time,activity_id from cp_sheet_scoring_rules
+    </sql>
+
+    <select id="selectCpSheetScoringRulesList" parameterType="CpSheetScoringRules" resultMap="CpSheetScoringRulesResult">
+        <include refid="selectCpSheetScoringRulesVo"/>
+        <where>  
+            <if test="sheetId != null "> and sheet_id = #{sheetId}</if>
+            <if test="deptId != null  and deptId != ''"> and dept_id = #{deptId}</if>
+            <if test="rankId != null  and rankId != ''"> and rank_id = #{rankId}</if>
+            <if test="groupName != null  and groupName != ''"> and group_name like concat('%', #{groupName}, '%')</if>
+            <if test="fraction != null  and fraction != ''"> and fraction = #{fraction}</if>
+            <if test="sheetType != null "> and sheet_type = #{sheetType}</if>
+            <if test="activityId != null "> and activity_id = #{activityId}</if>
+        </where>
+    </select>
+    
+    <select id="selectCpSheetScoringRulesById" parameterType="String" resultMap="CpSheetScoringRulesResult">
+        <include refid="selectCpSheetScoringRulesVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertCpSheetScoringRules" parameterType="CpSheetScoringRules">
+        insert into cp_sheet_scoring_rules
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="sheetId != null">sheet_id,</if>
+            <if test="deptId != null">dept_id,</if>
+            <if test="rankId != null">rank_id,</if>
+            <if test="groupName != null">group_name,</if>
+            <if test="fraction != null">fraction,</if>
+            <if test="sheetType != null">sheet_type,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="activityId != null ">activity_id,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="sheetId != null">#{sheetId},</if>
+            <if test="deptId != null">#{deptId},</if>
+            <if test="rankId != null">#{rankId},</if>
+            <if test="groupName != null">#{groupName},</if>
+            <if test="fraction != null">#{fraction},</if>
+            <if test="sheetType != null">#{sheetType},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="activityId != null ">#{activityId},</if>
+         </trim>
+    </insert>
+
+    <update id="updateCpSheetScoringRules" parameterType="CpSheetScoringRules">
+        update cp_sheet_scoring_rules
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="sheetId != null">sheet_id = #{sheetId},</if>
+            <if test="deptId != null">dept_id = #{deptId},</if>
+            <if test="rankId != null">rank_id = #{rankId},</if>
+            <if test="groupName != null">group_name = #{groupName},</if>
+            <if test="fraction != null">fraction = #{fraction},</if>
+            <if test="sheetType != null">sheet_type = #{sheetType},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="activityId != null ">activity_id = #{activityId},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteCpSheetScoringRulesById" parameterType="String">
+        delete from cp_sheet_scoring_rules where id = #{id}
+    </delete>
+
+    <delete id="deleteCpSheetScoringRulesByIds" parameterType="String">
+        delete from cp_sheet_scoring_rules where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+    <!-- 查询计分规则列表 -->
+    <select id="selectSheetScoreRulesBySheetIdTypeActId" parameterType="CpSheetScoringRules" resultType="Map">
+        SELECT sr.activity_id activityId,sr.sheet_id sheetId,sr.sheet_type sheetType,sr.dept_id deptId,d.name deptName,sr.group_name groupName,GROUP_CONCAT(r.name  order by r.create_time SEPARATOR '|') allRank,
+        GROUP_CONCAT(sr.rank_id  order by sr.rank_id SEPARATOR ',') rankIds,sr.fraction   
+        FROM cp_sheet_scoring_rules sr 
+        left join cp_dept d on sr.dept_id = d.id 
+        left join cp_rank r on sr.rank_id = r.id 
+        where sr.activity_id = #{activityId} 
+        and sr.sheet_id = #{sheetId} 
+        and sr.sheet_type = #{sheetType} 
+        group by sr.activity_id,sr.sheet_id,sr.sheet_type,sr.dept_id,d.name,sr.group_name,sr.fraction
+    </select>
+    
+    <!-- 根据多条件删除计分规则 -->
+    <delete id="delSheetScoreRulesByMore" parameterType="CpSheetScoringRules">
+    	delete from cp_sheet_scoring_rules 
+    	where activity_id = #{activityId}
+    	and sheet_id = #{sheetId}
+    	and sheet_type = #{sheetType}
+    	and dept_id = #{deptId}
+    	and group_name is null
+    </delete>
+
+
+
+    <select id="selectrankbydeptidandactid" parameterType="CpSheetScoringRules" resultMap="CpSheetScoringRulesResult">
+        <include refid="selectCpSheetScoringRulesVo"/>
+        <where>
+            <if test="sheetId != null "> sheet_id = #{sheetId}</if>
+            <if test="deptId != null  and deptId != ''"> and dept_id = #{deptId}</if>
+            <if test="activityId != null "> and activity_id = #{activityId}</if>
+        </where>
+    </select>
+    
+    <!-- 计分规则又改了 -->
+    <select id="selectRankScoreRulesByActIdSid" parameterType = "CpSheetScoringRules" resultType="Map">
+    	select sr.id,r.id rankId,sr.rank_id sRankId,r.name rankName,sr.sheet_id sheetId,sr.activity_id activityId,sr.fraction,sr.sheet_type sheetType 
+    	from cp_rank r left join cp_sheet_scoring_rules sr on 
+		r.id = sr.rank_id and sr.sheet_id = #{sheetId} and sr.activity_id=#{activityId}
+    </select>
+</mapper>

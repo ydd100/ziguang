@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.managementbackground.template.mapper.CpTemplateMapper">
+    
+    <resultMap type="CpTemplate" id="CpTemplateResult">
+        <result property="id"    column="id"    />
+        <result property="name"    column="name"    />
+        <result property="type"    column="type"    />
+        <result property="status"    column="status"    />
+        <result property="createUserId"    column="create_user_id"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createUserName"    column="create_user_name"    />
+    </resultMap>
+
+    <sql id="selectCpTemplateVo">
+        select id, name, type, status, create_user_id, create_time, create_user_name from cp_template
+    </sql>
+
+    <select id="selectCpTemplateList" parameterType="CpTemplate" resultMap="CpTemplateResult">
+        <include refid="selectCpTemplateVo"/>
+        <where>  
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="type != null  and type != ''"> and type = #{type}</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+            <if test="createUserId != null "> and create_user_id = #{createUserId}</if>
+            <if test="createUserName != null  and createUserName != ''"> and create_user_name like concat('%', #{createUserName}, '%')</if>
+        </where>
+    </select>
+    
+    <select id="selectCpTemplateById" parameterType="Long" resultMap="CpTemplateResult">
+        <include refid="selectCpTemplateVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertCpTemplate" parameterType="CpTemplate" useGeneratedKeys="true" keyProperty="id">
+        insert into cp_template
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null">name,</if>
+            <if test="type != null">type,</if>
+            <if test="status != null">status,</if>
+            <if test="createUserId != null">create_user_id,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="createUserName != null">create_user_name,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null">#{name},</if>
+            <if test="type != null">#{type},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createUserId != null">#{createUserId},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="createUserName != null">#{createUserName},</if>
+         </trim>
+    </insert>
+
+    <update id="updateCpTemplate" parameterType="CpTemplate">
+        update cp_template
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null">name = #{name},</if>
+            <if test="type != null">type = #{type},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createUserId != null">create_user_id = #{createUserId},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createUserName != null">create_user_name = #{createUserName},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteCpTemplateById" parameterType="Long">
+        delete from cp_template where id = #{id}
+    </delete>
+
+    <delete id="deleteCpTemplateByIds" parameterType="String">
+        delete from cp_template where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

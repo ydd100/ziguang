@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.userbackground.cpStatisResult.mapper.CpStatisResultMapper">
+    
+    <resultMap type="CpStatisResult" id="CpStatisResultResult">
+        <result property="id"    column="id"    />
+        <result property="activityId"    column="activity_id"    />
+        <result property="sheetId"    column="sheet_id"    />
+        <result property="columnId"    column="column_id"    />
+        <result property="columnTitle"    column="column_title"    />
+        <result property="columnValue"    column="column_value"    />
+        <result property="columnValue"    column="column_sort"    />
+        <result property="rankId"    column="rank_id"    />
+        <result property="objDeptId"    column="obj_dept_id"    />
+        <result property="objUserId"    column="obj_user_id"    />
+    </resultMap>
+
+    <sql id="selectCpStatisResultVo">
+        select id, activity_id, sheet_id, column_id, column_title, column_value, column_sort, rank_id, obj_dept_id, obj_user_id from cp_statis_result
+    </sql>
+
+    <select id="selectCpStatisResultList" parameterType="CpStatisResult" resultMap="CpStatisResultResult">
+        <include refid="selectCpStatisResultVo"/>
+        <where>  
+            <if test="activityId != null "> and activity_id = #{activityId}</if>
+            <if test="sheetId != null "> and sheet_id = #{sheetId}</if>
+            <if test="columnId != null "> and column_id = #{columnId}</if>
+            <if test="columnTitle != null  and columnTitle != ''"> and column_title = #{columnTitle}</if>
+            <if test="columnValue != null  and columnValue != ''"> and column_value = #{columnValue}</if>
+            <if test="columnSort != null  and columnSort != ''"> and column_sort = #{columnSort}</if>
+            <if test="rankId != null  and rankId != ''"> and rank_id = #{rankId}</if>
+            <if test="objDeptId != null  and objDeptId != ''"> and obj_dept_id = #{objDeptId}</if>
+            <if test="objUserId != null  and objUserId != ''"> and obj_user_id = #{objUserId}</if>
+        </where>
+    </select>
+    
+    <select id="selectCpStatisResultById" parameterType="String" resultMap="CpStatisResultResult">
+        <include refid="selectCpStatisResultVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertCpStatisResult" parameterType="CpStatisResult">
+        insert into cp_statis_result
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="activityId != null">activity_id,</if>
+            <if test="sheetId != null">sheet_id,</if>
+            <if test="columnId != null">column_id,</if>
+            <if test="columnTitle != null">column_title,</if>
+            <if test="columnValue != null">column_value,</if>
+            <if test="columnSort != null">column_sort,</if>
+            <if test="rankId != null">rank_id,</if>
+            <if test="objDeptId != null">obj_dept_id,</if>
+            <if test="objUserId != null">obj_user_id,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="activityId != null">#{activityId},</if>
+            <if test="sheetId != null">#{sheetId},</if>
+            <if test="columnId != null">#{columnId},</if>
+            <if test="columnTitle != null">#{columnTitle},</if>
+            <if test="columnValue != null">#{columnValue},</if>
+            <if test="columnSort != null">#{columnSort},</if>
+            <if test="rankId != null">#{rankId},</if>
+            <if test="objDeptId != null">#{objDeptId},</if>
+            <if test="objUserId != null">#{objUserId},</if>
+         </trim>
+    </insert>
+
+    <update id="updateCpStatisResult" parameterType="CpStatisResult">
+        update cp_statis_result
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="activityId != null">activity_id = #{activityId},</if>
+            <if test="sheetId != null">sheet_id = #{sheetId},</if>
+            <if test="columnId != null">column_id = #{columnId},</if>
+            <if test="columnTitle != null">column_title = #{columnTitle},</if>
+            <if test="columnValue != null">column_value = #{columnValue},</if>
+            <if test="columnSort != null">column_sort = #{columnSort},</if>
+            <if test="rankId != null">rank_id = #{rankId},</if>
+            <if test="objDeptId != null">obj_dept_id = #{objDeptId},</if>
+            <if test="objUserId != null">obj_user_id = #{objUserId},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteCpStatisResultById" parameterType="String">
+        delete from cp_statis_result where id = #{id}
+    </delete>
+
+    <delete id="deleteCpStatisResultByIds" parameterType="String">
+        delete from cp_statis_result where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!-- 批量保存测量信息 -->
+    <insert id="batchInsertCpStatisResult" parameterType="List" >
+        insert into cp_statis_result
+            (id, activity_id, sheet_id, column_id, column_title, column_value, column_sort, rank_id, obj_dept_id, obj_user_id)
+        values
+        <foreach collection="cpInfoList" item="cpInfo" index="index" separator=",">
+            (uuid(), #{cpInfo.activityId}, #{cpInfo.sheetId}, #{cpInfo.columnId}, #{cpInfo.columnTitle}, #{cpInfo.columnValue}, #{cpInfo.columnSort}, #{cpInfo.rankId}, #{cpInfo.objDeptId}, #{cpInfo.objUserId})
+        </foreach>
+
+    </insert>
+
+    <!-- 部门统计返回 -->
+    <resultMap type="Map" id="CpDeptStatisResult">
+        <result property="activityId"    column="activity_id"    />
+        <result property="sheetId"    column="sheet_id"    />
+        <result property="columnId"    column="column_id"    />
+        <result property="columnTitle"    column="column_title"    />
+        <result property="avgValue"    column="avg_value"    />
+        <result property="rankId"    column="rank_id"    />
+        <result property="rankName"    column="rank_name"    />
+        <result property="objDeptId"    column="obj_dept_id"    />
+        <result property="objDeptName"    column="obj_dept_name"    />
+    </resultMap>
+
+    <!-- 部门统计结果 -->
+    <select id="selectAvgByActIdShIdShType" parameterType="Long" resultMap="CpDeptStatisResult">
+        select op.activity_id,op.sheet_id,op.dept_id obj_dept_id,d.name obj_dept_name,sr.rank_id,r.name rank_name,sr.column_id,sr.column_title,cast(avg(sr.column_value) as DECIMAL(18,2)) avg_value
+        from cp_sheet_obj_participant op left join cp_dept d on op.dept_id = d.id
+        left join cp_statis_result sr on op.activity_id = sr.activity_id and op.sheet_id = sr.sheet_id and op.dept_id = sr.obj_dept_id
+        left join cp_rank r on sr.rank_id = r.id
+        where op.activity_id = #{activityId} and op.sheet_id = #{sheetId} and op.sheet_type = #{sheetType} and (sr.rank_id is not null and sr.rank_id != '')
+        group by op.activity_id,op.sheet_id,op.sheet_type,op.dept_id,d.name,sr.rank_id,r.name,sr.column_id,sr.column_title
+        order by op.dept_id,sr.column_id
+    </select>
+
+    <!-- 统计分步骤做start -->
+    <!-- 1.查询表格项 -->
+    <select id="selectColListByActIdShId" parameterType="Map" resultType="Map">
+        select column_id columnId,column_title columnTitle from cp_statis_result
+        where activity_id=#{activityId} and sheet_id=#{sheetId}
+        group by column_id,column_title,column_sort order by column_sort*1
+    </select>
+
+    <!-- 2.(活动开启职级)查询测评过的职级 -->
+    <select id="selectRankListByActIdShId" parameterType="Map" resultType="Map">
+        select sr.rank_id rankId,r.name rankName from cp_statis_result sr left join cp_rank r on sr.rank_id = r.id
+        where sr.activity_id=#{activityId} and sr.sheet_id=#{sheetId}
+        group by sr.rank_id,r.name
+    </select>
+
+    <!-- 3.(开启职级)查询测评对象是部门的均值和加权分数(按部门排序，是为了将相同部门放到一起，便于处理数据) -->
+    <select id="selectDeptResultByActIdShId" parameterType="Map" resultType="Map">
+        select sr.activity_id activityId,sr.sheet_id sheetId,sr.column_id columnId,sr.rank_id rankId,sr.obj_dept_id objDeptId,d.name objDeptName,sc.fraction,
+               cast((case when (sc.fraction = '' or sc.fraction is null) then avg(sr.column_value)*1 else sc.fraction * avg(sr.column_value)/100 end) as DECIMAL(18,2)) jqValue,
+               avg(sr.column_value) avgValue from
+            cp_statis_result sr left join cp_sheet_scoring_rules sc on sr.activity_id = sc.activity_id and sr.sheet_id = sc.sheet_id and sr.rank_id = sc.rank_id
+--                     and sr.obj_dept_id = sc.dept_id
+                left join cp_dept d on sr.obj_dept_id = d.id
+        where sr.activity_id=#{activityId} and sr.sheet_id=#{sheetId}
+        group by sr.activity_id,sr.sheet_id,sr.column_id,sr.rank_id,sr.obj_dept_id,d.name,sc.fraction,sr.column_sort order by sr.obj_dept_id
+    </select>
+
+    <!-- 3.(开启职级)查询测评对象是个人的均值和加权分数(按人员id排序，是为了将相同部门放到一起，便于处理数据) -->
+    <select id="selectUserResultByActIdShId" parameterType="Map" resultType="Map">
+        select sr.activity_id activityId,sr.sheet_id sheetId,sr.column_id columnId,sr.rank_id rankId,sr.obj_user_id objUserId,u.name objUserName,sc.fraction,
+               cast((case when (sc.fraction = '' or sc.fraction is null) then avg(sr.column_value)*1 else sc.fraction * avg(sr.column_value)/100 end) as DECIMAL(18,2)) jqValue,
+               avg(sr.column_value) avgValue from
+            cp_statis_result sr left join cp_user u on sr.obj_user_id = u.id left join cp_sheet_scoring_rules sc on sr.activity_id = sc.activity_id and sr.sheet_id = sc.sheet_id and sr.rank_id = sc.rank_id
+--                     and u.dept_id = sc.dept_id
+        where sr.activity_id=#{activityId} and sr.sheet_id=#{sheetId}
+        group by sr.activity_id,sr.sheet_id,sr.column_id,sr.rank_id,sr.obj_user_id,u.name,sc.fraction,sr.column_sort order by sr.obj_user_id
+    </select>
+
+    <!-- 3.(不开职级)查询测评对象是部门的均值和加权分数(按部门排序，是为了将相同部门放到一起，便于处理数据) -->
+    <select id="selectDeptResultByActIdShIdNoRank" parameterType="Map" resultType="Map">
+        select sr.activity_id activityId,sr.sheet_id sheetId,sr.column_id columnId,sr.obj_dept_id objDeptId,d.name objDeptName,sc.fraction,
+               cast((case when (sc.fraction = '' or sc.fraction is null) then avg(sr.column_value)*1 else sc.fraction * avg(sr.column_value)/100 end) as DECIMAL(18,2)) jqValue,
+               avg(sr.column_value) avgValue from
+            cp_statis_result sr left join cp_sheet_scoring_rules sc on sr.activity_id = sc.activity_id and sr.sheet_id = sc.sheet_id
+--                  and sr.obj_dept_id = sc.dept_id
+                left join cp_dept d on sr.obj_dept_id = d.id
+        where sr.activity_id=#{activityId} and sr.sheet_id=#{sheetId}
+        group by sr.activity_id,sr.sheet_id,sr.column_id,sr.obj_dept_id,d.name,sc.fraction,sr.column_sort order by sr.obj_dept_id
+    </select>
+
+    <!-- 3.(不开职级)查询测评对象是个人的均值和加权分数(按人员id排序，是为了将相同部门放到一起，便于处理数据) -->
+    <select id="selectUserResultByActIdShIdNoRank" parameterType="Map" resultType="Map">
+        select sr.activity_id activityId,sr.sheet_id sheetId,sr.column_id columnId,sr.obj_user_id objUserId,u.name objUserName,sc.fraction,
+               cast((case when (sc.fraction = '' or sc.fraction is null) then avg(sr.column_value)*1 else sc.fraction * avg(sr.column_value)/100 end) as DECIMAL(18,2)) jqValue,
+               avg(sr.column_value) avgValue from
+            cp_statis_result sr left join cp_user u on sr.obj_user_id = u.id left join cp_sheet_scoring_rules sc on sr.activity_id = sc.activity_id and sr.sheet_id = sc.sheet_id
+--                             and u.dept_id = sc.dept_id
+        where sr.activity_id=#{activityId} and sr.sheet_id=#{sheetId}
+        group by sr.activity_id,sr.sheet_id,sr.column_id,sr.obj_user_id,u.name,sc.fraction,sr.column_sort order by sr.obj_user_id
+    </select>
+    <!-- 统计分步骤做start -->
+    
+    <!-- 原始数据===部门表格 -->
+    <select id="selectOriDeptResult" parameterType="Map" resultType="Map">
+    	select activity_id activityId,sheet_id sheetId,fraction,obj_dept_id objId,dept_name objName,group_concat(column_id,':',all_value order by column_sort SEPARATOR ';') colData 
+    	from (
+			select sr.activity_id,sr.sheet_id,ss.fraction,sr.obj_dept_id,d.name dept_name,sr.column_id,sr.column_sort,group_concat(sr.column_value SEPARATOR '|') all_value 
+			from cp_statis_result sr left join cp_dept d on sr.obj_dept_id = d.id 
+			left join cp_sheet_scoring_rules ss on sr.activity_id = ss.activity_id and sr.sheet_id = ss.sheet_id
+-- 			           and sr.obj_dept_id = ss.dept_id
+			           and sr.rank_id = ss.rank_id
+			where (sr.obj_user_id = '' or sr.obj_user_id is null) and sr.activity_id=#{activityId} and sr.sheet_id=#{sheetId}
+			group by sr.activity_id,sr.sheet_id,ss.fraction,sr.obj_dept_id,d.name,sr.column_id,sr.column_sort)t 
+		group by activity_id,sheet_id,fraction,obj_dept_id,dept_name
+    </select>
+    
+    <!-- 原始数据===个人表格 -->
+	<select id="selectOriUserResult" parameterType="Map" resultType="Map">
+    	select activity_id activityId,sheet_id sheetId,fraction,obj_user_id objId,user_name objName,group_concat(column_id,':',all_value order by column_sort SEPARATOR ';') colData 
+    	from (
+			select sr.activity_id,sr.sheet_id,ss.fraction,sr.obj_user_id,u.name user_name,sr.column_id,sr.column_sort,group_concat(sr.column_value SEPARATOR '|') all_value 
+			from cp_statis_result sr left join cp_user u on sr.obj_user_id = u.id 
+			left join cp_sheet_scoring_rules ss on sr.activity_id = ss.activity_id and sr.sheet_id = ss.sheet_id
+-- 			          and u.dept_id = ss.dept_id
+			          and u.rank_id = ss.rank_id
+			where (sr.obj_user_id !='' and sr.obj_user_id is not null) and sr.activity_id=#{activityId} and sr.sheet_id=#{sheetId} 
+			group by sr.activity_id,sr.sheet_id,ss.fraction,sr.obj_user_id,u.name,sr.column_id,sr.column_sort)t 
+		group by activity_id,sheet_id,fraction,obj_user_id,user_name
+    </select>
+</mapper>

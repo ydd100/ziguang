@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('修改测评活动')" />
+    <th:block th:include="include :: datetimepicker-css" />
+    <style>
+        #copyTxt {
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            z-index: -20;
+        }
+        .k20 {
+            height: 20px;
+            clear: both;
+        }
+        .wb33 {
+            width: 33.333%;
+            display: inline-block;
+        }
+        .fl {
+            float: left;
+        }
+    </style>
+</head>
+<body class="white-bg">
+    <div class="btn-group-sm"  role="group">
+        <a class="btn btn-success" onclick="returnto()" style="margin: 1%"> 返回</a>
+    </div>
+<!--    <div class="wrapper wrapper-content animated fadeInRight ibox-content">-->
+        <div class="col-sm-12">
+            <div class="tabs-container">
+                <ul class="nav nav-tabs">
+                    <li class="active"><a data-toggle="tab" href="#tab-2" aria-expanded="false" onclick="tab2()">设置</a></li>
+                    <li class=""><a data-toggle="tab" href="#tab-3" aria-expanded="false" onclick="tab3()">投票帐号</a></li>
+                    <li class=""><a data-toggle="tab" href="#tab-1" aria-expanded="true" onclick="tab1()"> 投票概况</a></li>
+                    <li class=""><a data-toggle="tab" href="#tab-4" aria-expanded="false" onclick="tab4()">报表</a></li>
+                </ul>
+                <div class="tab-content">
+                    <div id="tab-1" class="tab-pane">
+                        <div class="panel-body" style="padding:0;">
+                            <div class="col-sm-12">
+                                <div class="k20"></div>
+                                <div class="wb33 fl" id="actStatus"></div>
+                                <div class="wb33 fl" th:text="${'开始时间：'+ #dates.format(cpActivity.activityBeginTime, 'yyyy-MM-dd HH:mm:ss')}"></div>
+                                <div class="wb33 fl" th:text="${'截止时间：'+ #dates.format(cpActivity.activityEndTime, 'yyyy-MM-dd HH:mm:ss')}"></div>
+                            </div>
+
+                            <div class="col-sm-12 table-striped">
+                                <!-- 投票概况  -->
+                                <table id="votes-table"></table>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="tab-2" class="tab-pane active">
+                        <div class="panel-body" style="padding:0;">
+                            <div class="col-sm-12 table-striped">
+                                <table id="bootstrap-table"></table>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="tab-3" class="tab-pane">
+                        <div class="panel-body">
+                            <div class="col-sm-12">
+                                <h3>活动地址</h3>
+                                <hr style="margin-top:10px;margin-bottom:10px;">
+                                <div style="height:200px;">
+                                    <h6>适用于全员无码公开投票方式</h6>
+                                    <div style="float: left;width: 45%;">
+                                        <div class="form-group" style="margin-top: 5%;">
+                                            <label class="col-sm-3 control-label" style="width:20%;padding-left:0px;padding-right:0px;">表单地址：</label>
+                                            <div class="col-sm-9" style="padding-left:0px;padding-right:0px;">
+                                                <input style="width: 100%;font-size:12px;" readonly name="aaaurl" id="aaaurl" class="form-control" type="text" value="">
+                                            </div>
+                                        </div>
+                                        <textarea id="copyTxt" cols="30" rows="10"></textarea>
+                                        <a class="btn btn-success" onclick="geturlbycode()" id="aaa_a" style="margin-top: 15px;"> 获取网址</a>
+                                        <a class="btn btn-success" onclick="copyurl()" style="margin-top: 15px;"> 复制网址</a>
+                                        <a class="btn btn-success" onclick="openurl()" style="margin-top: 15px;"> 打开网址</a>
+                                    </div>
+                                    <div style="float: left;width: 45%;">
+                                        <img id="aaaimg" th:src="@{${codepath}}" style="margin: 4%">
+                                        <input id="aaaimg1"  style="display: none" type="text"></input>
+                                    </div>
+                                </div>
+                                <hr>
+
+                                <div style="height: 100px;margin: 1%;background-color: #f8f8f8;width: 30%;float: left;padding-top:5px;padding-left:10px;">
+                                    <p style="margin: 2%;">按部门制码</p>
+                                    <h6>(每个下级单位一个码)</h6>
+                                    <a class="btn btn-success btn-sm" onclick="gencodebydept()" style=""> 生成码</a>
+                                </div>
+
+                                <div style="height: 100px;margin: 1%;background-color: #f8f8f8;width: 30%;float: left;padding-top:5px;padding-left:10px;">
+                                    <p style="margin: 2%;">按职级制码</p>
+                                    <h6>(每个下级单位不同职级生成不同码)</h6>
+                                    <a class="btn btn-success btn-sm" onclick="gencodebyrank()" style=""> 生成码</a>
+                                </div>
+
+                                <div style="height: 100px;margin: 1%;background-color: #f8f8f8;width: 34%;float: left;padding-top:5px;padding-left:10px;">
+                                    <p style="margin: 2%;">全员1人1码</p>
+                                    <h6>(按全员人数生成随机码，有效控制投票次数)</h6>
+                                    <a class="btn btn-success btn-sm" onclick="gencodebyperson()" style=""> 生成码</a>
+                                </div>
+                                <hr>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="tab-4" class="tab-pane">
+                        <div class="panel-body" style="padding:10px;">
+                            <div class="col-sm-3">
+                                <select id="sheetId" class="form-control" onchange="selectTableBySheet()" style="margin-left: -4%"></select>
+                            </div>
+                            <div class="col-sm-12" style="padding:0px;margin-top:5px;">
+				                <div class="tabs-container">
+				                    <div class="tabs-left">
+				                        <ul class="nav nav-tabs" style="width:11%;">
+				                            <li class="active"><a data-toggle="tab" href="#tab-4-1"> 统计结果</a>
+				                            </li>
+				                            <li class=""><a data-toggle="tab" href="#tab-4-2" onclick="selectOriDataResult()"> 原始数据</a>
+				                            </li>
+				                        </ul>
+				                        <div class="tab-content ">
+				                            <div id="tab-4-1" class="tab-pane active">
+				                                <div class="panel-body" style="width:89%;margin-left:11%;">
+                                                    <div style="float:left;width:70%;">
+                                                        <p>生成票数：<span id="allCodeNum"></span>；已经投票：<span id="alreadyVote"></span>；剩余票数：<span id="oddCodeNum"></span>；</p>
+                                                    </div>
+                                                    <div style="float:left;width:28%;text-align: right;">
+                                                        <button type="button" class="btn btn-success btn-sm" onclick="exportStatisResult()">导出结果</button>
+                                                    </div>
+                                                    <div class="col-sm-12 select-table table-bordered" style="box-shadow:0 0px 0px #ccc;padding:0;margin-top:0px;">
+														<table id="statis-table"></table>
+													</div>
+				                                </div>
+				                            </div>
+				                            <div id="tab-4-2" class="tab-pane">
+				                                <div class="panel-body" style="width:89%;margin-left:11%;">
+				                                	<div class="col-sm-12 select-table table-bordered" style="box-shadow:0 0px 0px #ccc;padding:0;margin-top:0px;">
+														<table id="oriData-table"></table>
+													</div>
+				                                </div>
+				                            </div>
+				                        </div>
+				
+				                    </div>
+				
+				                </div>
+				            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+<!--    </div>-->
+    <th:block th:include="include :: footer" />
+    <th:block th:include="include :: datetimepicker-js" />
+    <script th:inline="javascript">
+        var prefix = ctx + "managementbackground/activity";
+        var statusDatas = [[${@dict.getType('actity_state')}]];
+        var sheetObjType = [[${@dict.getType('sheet_obj_type')}]];
+        var cpActivity = [[${cpActivity}]];
+
+        var actStatus = '';
+        $.each(statusDatas,function(index,row){
+            if(row.dictValue == cpActivity.status){
+                actStatus = row.dictLabel;
+            }
+        })
+        $("#actStatus").text('当前状态：' + actStatus);
+        //返回
+        function returnto(){
+            location.href =  ctx + "managementbackground/activity";
+        }
+        //加载tab1--------------
+        $(function(){
+            tab2();
+        })
+
+        function tab1() {
+            $.table.destroy('votes-table');
+            var activityId = cpActivity.id;
+            var options = {
+                id: "votes-table",
+                url: ctx + "userbackground/CpRankCode/selectVotesStatusByActId",
+                showSearch: false,
+                showRefresh: false,
+                showColumns: false,
+                showToggle: false,
+                pagination: false,
+                modalName: "投票概况",
+                columns: [
+                    {
+                        field: 'id',
+                        visible: false
+                    },
+                    {
+                        field: 'deptName',
+                        title: '部门名称',
+                        formatter:function(value,row,index){
+                            var rows = $("#votes-table").bootstrapTable('getData');
+
+                            if(index>0) {
+                                if(rows[index-1].deptName == value){
+                                    value = '';
+                                }
+                            }
+
+                            return value;
+                        }
+                    },
+                    {
+                        field: 'rankName',
+                        title: '职级'
+                    },
+                    {
+                        field: 'codeNum',
+                        title: '生成票数'
+                    },
+                    {
+                        field: 'scanningTimes',
+                        title: '已投票数'
+                    },
+                    {
+                        field: 'oddTimes',
+                        title: '剩余票数'
+                    },
+                ],
+                queryParams:function(param){
+                    param.activityId = activityId;
+                    return param;
+                }
+            };
+            $.table.init(options);
+        }
+        //加载tab2--------------
+        function tab2(){
+            var activityId = cpActivity.id;
+        	var options = {
+                id: "bootstrap-table",
+                url: prefix + "/selectSheetByActivityId",
+                showSearch: false,
+                showRefresh: false,
+                showColumns: false,
+                showToggle: false,
+                modalName: "测评",
+                columns: [
+                    {
+                        field: 'id',
+                        title: '创建人',
+                        visible: false
+                    },
+                    {
+                        field: 'name',
+                        title: '名称'
+                    },
+                    {
+                        field: 'objType',
+                        title: '对象类型',
+                        formatter: function(value, row, index) {
+                            return $.table.selectDictLabel(sheetObjType, value);
+                        }
+                    },
+                    {
+                        title: '操作',
+                        align: 'center',
+                        formatter: function(value, row, index) {
+                            var actions = [];
+                            actions.push('<a class="btn btn-success btn-xs"  onclick="cpobj(\'' + row.id + '\',\'' + row.objType + '\',\''+row.activityId+'\')">测评对象</a> ');
+                            actions.push('<a class="btn btn-danger btn-xs"  onclick="cyz(\'' + row.id + '\',\'' + row.objType + '\',\''+row.activityId+'\')">参与者</a>');
+                            actions.push('<a class="btn btn-success btn-xs" style="margin-left: 1%"  onclick="jf(\'' + row.id + '\',\'' + row.objType + '\',\''+row.activityId+'\')"> 计分规则</a> ');
+                            return actions.join('');
+                        }
+                    }
+                ],
+                queryParams:function(param){
+                	param.activityId = activityId;
+                	return param;
+                }
+            };
+            $.table.init(options);
+        }
+        function cpobj(id,objType,activityId) {
+            if(objType == 0){//0个人1部门
+                directPage(ctx + "managementbackground/activity/cpobjgr?sheetid="+id+"&objType="+objType+"&activityId="+activityId);
+            }else {
+                directPage(ctx + "managementbackground/activity/cpobjdept?sheetid=" + id + "&objType=" + objType + "&activityId=" + activityId);
+            }
+        }
+        function cyz(id,objType,activityId) {
+            directPage(ctx + "managementbackground/activity/cyz?sheetid="+id+"&objType="+objType+"&activityId="+activityId);
+        }
+        function jf(id,objType,activityId) {
+            // if(objType == 0) {//0个人1部门
+            //     directPage(ctx + "managementbackground/activity/jf?sheetid="+id+"&objType="+objType+"&activityId="+activityId);
+            // } else {
+            //     directPage(ctx + "managementbackground/activity/jfDept?sheetid="+id+"&objType="+objType+"&activityId="+activityId);
+            // }
+            directPage(ctx + "managementbackground/activity/jfAll?sheetid="+id+"&objType="+objType+"&activityId="+activityId);
+        }
+        //加载tab3--------------
+        function  tab3(){
+            //查询该活动下面有没有二维码
+            $.ajax({
+                url:ctx + 'managementbackground/activity/selectbyactity',
+                type:'post',
+                async:false,
+                data:{
+                    "activityId":cpActivity.id
+                },
+                success:function(data){
+                    debugger
+                    $("#aaaimg1").val(data.path);
+                    $("#aaaimg").attr('src',data.path);
+                    //将数据存在总码
+                    $.ajax({
+                        url:ctx + 'userbackground/CpUnlimitCode/addcode',
+                        type:'post',
+                        async:false,
+                        data:{
+                            "pathcode":data.path,
+                            "p1":data.p1,
+                            "activityId":cpActivity.id
+                        },
+                        success:function(data){}
+                    })
+                }
+            })
+        }
+        //复制
+        function copyurl(){
+            copyTxt.value = $("#aaaurl").val();		//将文本内容赋值到文本框
+            copyTxt.select()						//选择文本框中内容
+            document.execCommand('copy')
+            $.modal.msgSuccess('复制成功');
+        }
+        //打开
+        function openurl(){
+            window.open($("#aaaurl").val())
+        }
+        //按照部门制码
+        function gencodebydept(){
+        	directPage(ctx + "managementbackground/activity/gencodebydept?activityId="+cpActivity.id);
+        }
+        //按照职级制码
+        function gencodebyrank(){
+        	directPage(ctx + "managementbackground/activity/gencodebyrank?activityId="+cpActivity.id);
+        }
+        //按照一人制码
+        function gencodebyperson(){
+        	directPage(ctx + "managementbackground/activity/gencodebyperson?activityId="+cpActivity.id);
+        }
+
+
+        //获取网址
+        function geturlbycode(){
+            debugger
+            var imgpath = $("#aaaimg1").val();
+            $.ajax({
+                url:ctx + 'managementbackground/activity/shibiecode',
+                type:'post',
+                data: {
+                    "imgpath":imgpath
+                },
+                success:function(data){
+                    $("#aaaurl").val(data);
+                    document.getElementById("aaa_a").style.display = "none";
+                }
+            })
+        }
+
+        /********************            tab4--start                 ****************************/
+        //加载tab4--------------
+        function  tab4(){
+            //查询票数情况
+            selectCodeNumState();
+
+            selectSheetListByActId();//加载表格列表
+        }
+        //查询票数情况
+        function selectCodeNumState(){
+            var activityId = cpActivity.id;
+            $.ajax({
+                type: "post",
+                url: prefix + "/selectCodeNumState",
+                data: {
+                    activityId : activityId,
+                },
+                success: function(data){
+                    if(!isEmpty(data)){
+                        $("#allCodeNum").text(data.allCodeNum);
+                        $("#alreadyVote").text(data.alreadyVote);
+                        $("#oddCodeNum").text(data.oddCodeNum);
+                    }
+
+                }
+            })
+        }
+
+        //表格列表
+        function selectSheetListByActId() {
+            var activityId = cpActivity.id;
+            $.ajax({
+                type:"post",
+                url:prefix + "/selectSheetListByActivityId",
+                data:{
+                    activityId : activityId,
+                },
+                success:function(data){
+                    var opt = '<option value="">请选择表格</option>';
+                    $.each(data,function(index,row) {
+                        opt += '<option value="' + row.id + '" obj-type="'+row.objType+'">' + row.name + '</option>';
+                    })
+                    $("#sheetId").html(opt);
+                }
+            })
+        }
+        
+        //选择表格---查询统计报表和原始数据
+        function selectTableBySheet(){
+        	//查询数据结果
+        	selectStatisResult();
+        	
+        	//查询原始数据
+        	selectOriDataResult();
+        }
+
+        //查询数据结果
+        function selectStatisResult(){
+            var activityId = cpActivity.id;
+            var isnotRank = cpActivity.isnotRank;
+            var objType = $("#sheetId option:selected").attr("obj-type");//0:个人；1:部门
+            $.ajax({
+                type:"post",
+                url:ctx + "userbackground/cpStatisResult/selectDeptStatisResult",
+                data:{
+                    activityId : activityId,
+                    sheetId : $("#sheetId").val(),
+                    isnotRank : isnotRank,//(1开启0关闭)
+                    objType : objType,
+                },
+                async:false,
+                success:function(data){
+                    if(isEmpty(data)){
+                        return false;
+                    }
+                    chaiJieStatisResult(data);
+
+                }
+            })
+        }
+
+        var shuju = [];//为了判断需不需要导出
+        //拼表格数据
+        function chaiJieStatisResult(data){
+            var isnotRank = cpActivity.isnotRank;//(1开启0关闭)
+            var colList = data.colList;//项名称
+            var objType = $("#sheetId option:selected").attr("obj-type");//0:个人；1:部门
+
+            var valueMapList = data.valueMapList;//数据集合
+            shuju = data.MapList;//为了判断需不需要导出
+            //组合表头列
+            var tableColumn = [];
+            if (isnotRank == 1) {
+                var rankList = data.rankList;//职级名称
+
+                console.log(colList);
+                console.log(rankList);
+                console.log(valueMapList);
+                
+                //开启职级是三行，1：表格项，2：职级，3：分值
+                var firstRow = [];//部门和个人只有第二列名称不同，其它可共用
+                if (objType == 1) {
+                    firstRow = [{
+                        title : "编号",
+                        rowspan : 3,
+                    },{
+                        field : "objDeptName",
+                        title : "部门",
+                        rowspan : 3,
+                    }];
+                }else {
+                    firstRow = [{
+                        title : "编号",
+                        rowspan : 3,
+                    },{
+                        field : "objUserName",
+                        title : "姓名",
+                        rowspan : 3,
+                    }];
+                }
+                var secondRow = [];
+                var thirdRow = [];
+                var rankLen = (rankList.length)*2;//职级个数 * 2(平均分+加权分)，决定表格项的colspan的值
+                $.each(colList,function(index,col){
+                	var firstObj = {
+                			title : col.columnTitle,
+    						halign : 'center',
+    						colspan : rankLen,
+                	};
+                	firstRow.push(firstObj);
+                	
+                	//加第二行的职级
+                	$.each(rankList,function(i,rank){
+                		var secondObj = {
+                				title : rank.rankName,
+        						halign : 'center',
+        						colspan : 2,//平均分+加权分
+                		};
+                		secondRow.push(secondObj);
+                		
+                		//加第三行平均分和加权分
+                		var thirdAvg = {
+                				title:"平均分",
+                				field : col.columnId+'_'+rank.rankId+'_avg',
+                		};
+                		var thirdJq = {
+                				title:"加权分",
+                				field : col.columnId+'_'+rank.rankId+'_jq',
+                		};
+                		thirdRow.push(thirdAvg);
+                		thirdRow.push(thirdJq);
+                	})
+                })
+                var firstZjObj = {
+                    field : 'zj',
+                    title : "成绩总计",
+                    halign : "center",
+                    rowspan : 3,
+                };
+                firstRow.push(firstZjObj);
+                tableColumn.push(firstRow);
+                tableColumn.push(secondRow);
+                tableColumn.push(thirdRow);
+                
+            } else {//关闭职级
+                console.log(colList);
+                console.log(valueMapList);
+
+
+                //不开启职级是两行，1：表格项，2：分值
+                var firstRow = [];//部门和个人只有第二列名称不同，其它可共用
+                if (objType == 1) {
+                    firstRow = [{
+                        title : "编号",
+                        rowspan : 2,
+                    },{
+                        field : "objDeptName",
+                        title : "部门",
+                        rowspan : 2,
+                    }];
+                }else {
+                    firstRow = [{
+                        title : "编号",
+                        rowspan : 2,
+                    },{
+                        field : "objUserName",
+                        title : "姓名",
+                        rowspan : 2,
+                    }];
+                }
+                var secondRow = [];
+                $.each(colList,function(index,col){
+                    var firstObj = {
+                        title : col.columnTitle,
+                        halign : 'center',
+                        colspan : 2,//平均分+加权分
+                    };
+                    firstRow.push(firstObj);
+
+                    //加第二行平均分和加权分
+                    var secondAvg = {
+                        title:"平均分",
+                        field : col.columnId+'_avg',
+                    };
+                    var secondJq = {
+                        title:"加权分",
+                        field : col.columnId+'_jq',
+                    };
+                    secondRow.push(secondAvg);
+                    secondRow.push(secondJq);
+
+                })
+                var firstZjObj = {
+                    field : 'zj',
+                    title : "成绩总计",
+                    halign : "center",
+                    rowspan : 2,
+                };
+                firstRow.push(firstZjObj);
+                tableColumn.push(firstRow);
+                tableColumn.push(secondRow);
+
+            }
+            showStatisTable(tableColumn,valueMapList);
+
+        }
+        
+        //显示报表
+        function showStatisTable(tableColumn,valueMapList){
+        	$("#statis-table").bootstrapTable('destroy');
+        	$("#statis-table").bootstrapTable({
+        		data : valueMapList,
+        		showSearch : false,
+        		showRefresh : false, // 是否显示刷新按钮
+        		showColumns : false,
+        		showToggle : false,
+        		//height:450,
+        		columns : tableColumn,
+        	})
+        }
+        
+      	//查询原始数据
+    	function selectOriDataResult(){
+    		var activityId = cpActivity.id;
+    		var sheetId = $("#sheetId").val();
+            var objType = $("#sheetId option:selected").attr("obj-type");//0:个人；1:部门
+            $.table.destroy('oriData-table');
+      		var options = {
+                    id: "oriData-table",
+                    url: ctx + "userbackground/cpStatisResult/selectOriDataResult",
+                    showSearch: false,
+                    showRefresh: false,
+                    showColumns: false,
+                    showToggle: false,
+                    pagination: false,
+                    modalName: "原始数据",
+                    columns: [
+                        {
+                            field: 'objId',
+                            visible: false
+                        },
+                        {
+                            field: 'fraction',
+                            title: '权重'
+                        },
+                        {
+                            field: 'objName',
+                            title: '投票对象'
+                        },
+                        {
+                            field: 'colData',
+                            title: '数据'
+                        },
+                    ],
+                    queryParams:function(param){
+                        param.activityId = activityId;
+                        param.sheetId = sheetId;
+                        param.objType = objType;
+                        return param;
+                    }
+                };
+                $.table.init(options);
+      	}
+
+        //导出统计结果
+        function exportStatisResult(){
+            var sheetId = $("#sheetId").val();
+            var activityId = cpActivity.id;
+            var isnotRank = cpActivity.isnotRank;
+            var objType = $("#sheetId option:selected").attr("obj-type");//0:个人；1:部门
+            if(isEmpty(sheetId)){
+                $.modal.msgWarning('请先选择表格！');
+                return false;
+            }
+            if(shuju.length == 0){
+                $.modal.msgWarning('没有数据，无需导出！');
+                return false;
+            }
+            //isnotRank(1开启0关闭
+            location = ctx +"exportReportExcel/exportStatisResult?activityId="+activityId+"&sheetId="+sheetId+"&isnotRank="+isnotRank+"&objType="+objType;
+        }
+
+        /********************            tab4--end                 ****************************/
+    </script>
+</body>
+</html>

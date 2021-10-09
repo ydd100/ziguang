@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('左右互选组件')" />
+    <th:block th:include="include :: bootstrap-duallistbox-css" />
+    <style>
+        .fixed-table-toolbar {
+            display : none;
+        }
+        li {
+            list-style-type:none;
+        }
+    </style>
+</head>
+<body class="white-bg">
+<div class="btn-group-sm"  role="group" style="margin:1%;">
+    <a class="btn btn-success" onclick="returnto()"> 返回</a>
+</div>
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+<!--    <div class="row">-->
+        <div>
+            <div style="height: 100%;float:left;width: 25%;margin-right: 1%;border: 1px solid #e5e3e3">
+                <div class="ibox-content">
+                    部门选择:
+                    <select class="form-control" id="selectdept" onchange="clearRankCheck()">
+                        <!--<option>请选择部门</option>-->
+                    </select>
+                </div>
+                <div class="ibox-content" id="aaa">
+
+                </div>
+            </div>
+            <div style="float:left;width: 70%;">
+                <div class="col-sm-12 table-striped">
+                    <table id="bootstrap-table"></table>
+                </div>
+            </div>
+        </div>
+<!--    </div>-->
+    <a class="btn btn-success" onclick="savesure()" style="margin-top: 2%;margin-left: -0.5%;"> 确认</a>
+</div>
+<th:block th:include="include :: footer" />
+<th:block th:include="include :: bootstrap-duallistbox-js" />
+<script th:inline="javascript">
+    var sheetid = [[${sheetid}]];
+    var objType = [[${objType}]];//0:个人；1:单位／部门---sheet_type:1:个人参与者；3:部门参与者
+    var activityId = [[${activityId}]];
+
+    $(function(){
+        //获取部门
+        getdept();
+        //获取职级
+        getrank();
+        
+        initTable();//初始化表格
+        
+    })
+    
+    //初始化表格
+    function initTable(){
+    	var options = {
+               url: ctx + "userbackground/participant/selectCyzList",
+               showSearch: false,
+               showRefresh: false,
+               showColumns: false,
+               showToggle: false,
+               modalName: "参与者",
+               columns: [
+               {
+                   field: 'deptId',
+                   title: '',
+                   visible: false
+               },
+               {
+                   field: 'deptName',
+                   title: '部门名称',
+               },
+               {
+                   field: 'allRank',
+                   title: '包含职级',
+               },
+               {
+                   title: '操作',
+                   formatter: function(value, row, index) {
+                       var actions = [];
+                       actions.push('<a class="btn btn-success btn-xs " href="javascript:void(0)" onclick="editCyz(\'' + row.deptId + '\',\''+row.rankIds+'\')"><i class="fa fa-edit"></i> 编辑</a> ');
+                       actions.push('<a class="btn btn-danger btn-xs " href="javascript:void(0)" onclick="delCyz(\'' + row.deptId + '\',\''+row.activityId+'\',\''+row.sheetId+'\',\''+row.sheetType+'\')"><i class="fa fa-remove"></i> 删除</a>');
+                       return actions.join('');
+                   }
+               }],
+               queryParams:function(){
+                   var sheetId = sheetid;
+            	   var sheetType = '';
+            	   if(objType == 0) {
+            		   sheetType = '1';
+            	   }else {
+            		   sheetType = '3';
+            	   }
+            	   var param ={
+            			   sheetId:sheetId,
+            			   sheetType:sheetType,
+            			   activityId:activityId,
+            	   }
+            	   return param;
+               }
+           };
+           $.table.init(options);
+    }
+    function getdept(){
+        $.ajax({
+            url:ctx + 'managementbackground/dept/list',
+            type:'post',
+            data: {},
+            success:function(data){
+                for(var i=0;i<data.rows.length;i++){
+                    var sel = document.getElementById("selectdept");
+                    var opt = document.createElement("option");
+                    var opt = new Option(data.rows[i].name,data.rows[i].id);//第一个代表标签内的内容，第二个代表value
+                    sel.options.add(opt);
+                }
+            }
+        })
+    }
+    function getrank(){
+        $.ajax({
+            url:ctx + 'managementbackground/rank/list',
+            type:'post',
+            data: {},
+            success:function(data){
+                //给id为aaa的div添加复选框了
+                var ulStr = '<ul  style=""></ul>';
+                for(var i =0;i<data.rows.length;i++){
+                    // var oCheckbox=document.createElement("input");
+                    // var myText=document.createTextNode(data.rows[i].name);
+                    // oCheckbox.setAttribute("type","checkbox");
+                    // oCheckbox.setAttribute("id",data.rows[i].id);
+                    // oCheckbox.setAttribute("name","mycheckbox");
+                    // oCheckbox.setAttribute("value",data.rows[i].name);
+                    // var mydiv=document.getElementById("aaa");
+                    // mydiv.appendChild(oCheckbox);
+                    // mydiv.appendChild(myText);
+
+                    var row = data.rows[i];
+                    ulStr += '<li><input type="checkbox" id="'+row.id+'" name="mycheckbox" value="'+row.name+'"/>'+row.name+'</li>';
+
+                }
+                ulStr += '</ul>';
+                $("#aaa").html(ulStr);
+            }
+        })
+    }
+    //保存
+    function savesure(){
+        // var sheetid = cpActivity.id;
+        //获取职级id和名字
+        var str=document.getElementsByName("mycheckbox");
+        var objarray=str.length;
+        var chestr="";
+        for (i=0;i<objarray;i++) {
+            if(str[i].checked == true)
+            {
+                chestr+=str[i].id+",";
+            }
+        }
+        var rankids = chestr;
+
+        var deptid = $('#selectdept option:selected') .val();//选中的值
+        // var aaaa = [[${objType}]];
+        $.ajax({
+            url:ctx + 'userbackground/participant/batchaddcyz',
+            type:'post',
+            data: {
+                "sheetid":sheetid,
+                "rankids":rankids,
+                "deptid":deptid,
+                "aaaa":objType,
+                "activityId":activityId,
+            },
+            success:function(data){
+                if(data == "success"){
+                    $.modal.msgSuccess('保存成功');
+                    clearRankCheck();//清除选中状态
+                }
+                //需要查询
+                $.table.search();
+            }
+        })
+    }
+    //返回
+    function returnto(){
+        //回退到上一层
+        //window.history.back(-1);
+        rebackPage();
+    }
+    
+    //参与者列表编辑
+    function editCyz(deptId,rankIds){
+    	clearRankCheck();//清除上次选中状态
+    	
+    	var rankIdArr = rankIds.split(',');
+    	$("#selectdept").val(deptId);
+    	
+    	//选中checkbox职级
+    	$.each(rankIdArr,function(index,rankId){
+    		$('#'+rankId).prop("checked", true);
+    	})
+    	
+    	
+    }
+    
+    //参与者列表删除
+    function delCyz(deptId,actId,sId,sheetType){
+    	$.modal.confirm("确认要删除吗？", function() {
+    		var data = { "activityId": actId,"sheetId": sId,"sheetType": sheetType,"deptId": deptId };
+            $.operate.submit(ctx + "userbackground/participant/delSheetObjPartByMore", "post", "json", data);
+            $("#selectdept").val(deptId);
+            $("input[name='mycheckbox']:checkbox").each(function(){
+            	$(this).prop("checked", false);
+            })
+	    })
+    }
+    
+    //清除职级选中状态
+    function clearRankCheck(){
+    	$("input[name='mycheckbox']:checkbox").each(function(){
+        	$(this).prop("checked", false);
+        })
+
+        var deptid = $('#selectdept option:selected') .val();//选中的值
+        //查出绑定并且选中
+        $.ajax({
+            url:ctx + 'userbackground/participant/selectrankbydeptidandactid',
+            type:'post',
+            data: {
+                "deptId":deptid,
+                "activityId":activityId,
+                "sheetId":sheetid
+            },
+            success:function(data){
+                for(var i=0;i<data.length;i++){
+                    debugger
+                    console.log(data[i].rankId)
+                    if(data[i].rankId != ""){
+                        $('#'+data[i].rankId).prop("checked", true);
+                    }
+                }
+            }
+        })
+
+    }
+</script>
+</body>
+</html>

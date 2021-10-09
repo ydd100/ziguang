@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.userbackground.cpResult.mapper.CpResultMapper">
+
+    <resultMap type="TestObjVO" id="TestObjVOResult">
+        <result property="objDeptId"    column="objDeptId"    />
+        <result property="objDeptName"    column="objDeptName"    />
+        <result property="objUserId"    column="objUserId"    />
+        <result property="objUserName"    column="objUserName"    />
+    </resultMap>
+
+    <!-- 查询部门的被测对象 -->
+    <select id="selectTestDeptObjByParam" parameterType="TestObjVO" resultMap="TestObjVOResult">
+        select d.id objDeptId,d.name objDeptName from cp_sheet_obj_participant op
+        left join cp_dept d on op.dept_id = d.id
+        where op.activity_id = #{activityid} and op.sheet_id = #{sheetid} and op.sheet_type = #{sheettype}
+        group by d.id,d.name
+        order by d.id
+    </select>
+
+    <!-- 查询个人的被测对象 -->
+    <select id="selectTestUserObjByParam" parameterType="TestObjVO" resultMap="TestObjVOResult">
+        select u.id objUserId,u.name objUserName from cp_sheet_obj_participant op
+        left join cp_user u on op.obj_user_id = u.id
+        where op.activity_id = #{activityid} and op.sheet_id = #{sheetid} and op.sheet_type = #{sheettype}
+        group by u.id,u.name
+        order by u.id
+    </select>
+
+    <!-- 开启职级：sql里判断二维码类型，all(所有)和one(一人一码)查询选中职级(pageSelectRankId)权限内的所有列表 -->
+    <!-- dept(部门制码)查询部门(deptid)和选中的职级(pageSelectRankId)同时满足的表格列表 -->
+    <!-- rank(职级制码）查询职级(rankid)权限内的表格 -->
+    <select id="selectSheetByCyzRank" parameterType="ParamVO" resultType="Map" >
+        select op.activity_id activityId,s.id id,s.name name,s.obj_type objType
+        from cp_sheet_obj_participant op left join cp_sheet s on op.sheet_id = s.id
+        <where>
+            op.activity_id=#{activityid}
+            and (op.sheet_type = 1 or op.sheet_type=3)
+            <!-- sql里判断二维码类型，all(所有)和one(一人一码)查询选中职级(pageSelectRankId)权限内的所有列表 -->
+            <if test="codeType == 'all' or codeType == 'one'">
+                and op.rank_id = #{pageSelectRankId}
+            </if>
+            <!-- dept(部门制码)查询部门(deptid)和选中的职级(pageSelectRankId)同时满足的表格列表 -->
+            <if test="codeType == 'dept'">
+                and op.dept_id = #{deptid} and op.rank_id = #{pageSelectRankId}
+            </if>
+            <!-- rank(职级制码）查询职级(rankid)权限内的表格 -->
+            <if test="codeType == 'rank'">
+                and op.rank_id = #{rankid}
+            </if>
+        </where>
+        group by op.activity_id,s.id,s.name,s.obj_type
+    </select>
+
+    <!-- 不开启职级 -->
+    <select id="selectSheetByCyzNotRank" parameterType="ParamVO" resultType="Map" >
+        select op.activity_id activityId,s.id id,s.name name,s.obj_type objType
+        from cp_sheet_obj_participant op left join cp_sheet s on op.sheet_id = s.id
+        <where>
+            op.activity_id=#{activityid}
+            and (op.sheet_type = 1 or op.sheet_type=3)
+            <!-- sql里判断二维码类型，all(所有)和one(一人一码)查询所有表格列表 (不需要条件)-->
+            <!-- dept(部门制码)查询部门(deptid)内权限的表格列表 -->
+            <if test="codeType == 'dept'">
+                and op.dept_id = #{deptid}
+            </if>
+
+        </where>
+        group by op.activity_id,s.id,s.name,s.obj_type
+    </select>
+
+</mapper>

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.userbackground.CpDepartmentCode.mapper.CpDepartmentCodeMapper">
+    
+    <resultMap type="CpDepartmentCode" id="CpDepartmentCodeResult">
+        <result property="id"    column="id"    />
+        <result property="deptId"    column="dept_id"    />
+        <result property="deptName"    column="dept_name"    />
+        <result property="qrCodePath"    column="qr_code_path"    />
+        <result property="scanningTimes"    column="scanning_times"    />
+        <result property="actityId"    column="actity_id"    />
+    </resultMap>
+
+    <sql id="selectCpDepartmentCodeVo">
+        select id, dept_id, dept_name, qr_code_path, scanning_times, actity_id from cp_department_code
+    </sql>
+
+    <select id="selectCpDepartmentCodeList" parameterType="CpDepartmentCode" resultMap="CpDepartmentCodeResult">
+        <include refid="selectCpDepartmentCodeVo"/>
+        <where>  
+            <if test="deptId != null  and deptId != ''"> and dept_id = #{deptId}</if>
+            <if test="deptName != null  and deptName != ''"> and dept_name like concat('%', #{deptName}, '%')</if>
+            <if test="qrCodePath != null  and qrCodePath != ''"> and qr_code_path = #{qrCodePath}</if>
+            <if test="scanningTimes != null "> and scanning_times = #{scanningTimes}</if>
+            <if test="actityId != null "> and actity_id = #{actityId}</if>
+        </where>
+    </select>
+    
+    <select id="selectCpDepartmentCodeById" parameterType="String" resultMap="CpDepartmentCodeResult">
+        <include refid="selectCpDepartmentCodeVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectCpDepartmentCodeBydeptId" parameterType="CpDepartmentCode" resultMap="CpDepartmentCodeResult">
+        <include refid="selectCpDepartmentCodeVo"/>
+        where dept_id = #{deptId} AND actity_id = #{actityId}
+    </select>
+        
+    <insert id="insertCpDepartmentCode" parameterType="CpDepartmentCode">
+        insert into cp_department_code
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="deptId != null">dept_id,</if>
+            <if test="deptName != null">dept_name,</if>
+            <if test="qrCodePath != null">qr_code_path,</if>
+            <if test="scanningTimes != null">scanning_times,</if>
+            <if test="actityId != null">actity_id,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="deptId != null">#{deptId},</if>
+            <if test="deptName != null">#{deptName},</if>
+            <if test="qrCodePath != null">#{qrCodePath},</if>
+            <if test="scanningTimes != null">#{scanningTimes},</if>
+            <if test="actityId != null">#{actityId},</if>
+         </trim>
+    </insert>
+
+    <update id="updateCpDepartmentCode" parameterType="CpDepartmentCode">
+        update cp_department_code
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="deptId != null">dept_id = #{deptId},</if>
+            <if test="deptName != null">dept_name = #{deptName},</if>
+            <if test="qrCodePath != null">qr_code_path = #{qrCodePath},</if>
+            <if test="scanningTimes != null">scanning_times = #{scanningTimes},</if>
+            <if test="actityId != null">actity_id = #{actityId},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteCpDepartmentCodeById" parameterType="String">
+        delete from cp_department_code where id = #{id}
+    </delete>
+
+    <delete id="deleteCpDepartmentCodeByIds" parameterType="String">
+        delete from cp_department_code where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!-- 根据活动id统计部门生成票数 -->
+    <select id="selectCountCodeNumByActId" parameterType="Long" resultType="Map">
+        select actity_id,count(id) codeNum from cp_department_code where actity_id=#{activityId} group by actity_id
+    </select>
+
+    <!-- 根据活动id删除部门制码 -->
+    <delete id="deleteCpDepartmentCodeByActId" parameterType="Long">
+        delete from cp_department_code where actity_id = #{activityId}
+    </delete>
+
+</mapper>

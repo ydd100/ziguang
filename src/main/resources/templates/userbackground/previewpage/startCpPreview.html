@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <!-- <th:block th:include="include :: header('测评表格列表')" /> -->
+    
+    <link th:href="@{/css/wnui.css}" rel="stylesheet"/>
+	<link th:href="@{/css/web.css}" rel="stylesheet"/>
+	<link th:href="@{/css/userbackground/btn-imp.css}" rel="stylesheet"/>
+    <title>在线测评</title>
+    <style type="text/css">
+    	.win1 { 
+				position: fixed;
+				background-color: #fff;
+				border-radius: 4px;
+				box-shadow: 0 0 8px #ccc;
+				width: 25em; 
+				height: 18em;
+				margin:0 auto;
+				display: inline-block; 
+				padding:20px;
+				text-align: left;
+				left:calc(50% - 12.5em);
+				top:20vh;
+				line-height: 2em; 
+			} 
+			body {
+				background: #F3F5F8 url() no-repeat center top;
+				background-attachment:fixed;
+				background-size:100%;
+			}
+			.item-hd {
+			    background-color: #f5f5f5;
+			    padding: 3px;
+			    text-align: center;
+			    margin-top: 10px;
+			}
+    </style>
+    
+</head>
+<body>
+     <div class="wrap wap-wrap" style=" background-color: #fff;"> 
+		<div class="top">
+			<div class="backbox fl"><a href="javascript:void(0)" onclick="rebackPrev()"><i class="iconfont">&#xe60b;</i> 返回</a></div>
+			<div class="fc mtitle">测评对象：****部</div> 
+		</div>
+		
+		<!-- js动态显示详细信息 -->
+		<div class="col-data-info"></div>
+		
+		<div class="btn-wrap tc pd20">
+			<!-- <a href="cp-ok.html" class="btn btn-lg wb60"> 提交 </a> -->
+			<button id="subjectPath" class="btn btn-lg" onclick="submitResult()">提交</button>
+		</div>
+	</div>
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+	    var cpSheet = [[${cpSheet}]];
+	    var sheetId = cpSheet.id;
+	    $("#subjectPath").addClass(cpSheet.subjectPath);
+		$('body').css({
+			'background': '#F3F5F8 url('+ctx+cpSheet.backPath+') no-repeat center top',
+			'background-attachment':'fixed',
+			'background-size':'100%',
+		})
+		
+		function rebackPrev(){
+			window.location = ctx + "userbackground/previewpage/cpPreview?sheetId="+sheetId;
+		}
+		
+		function submitResult(){
+			window.location = ctx + "userbackground/previewpage/toEndCp?sheetId="+sheetId;
+		}
+		
+		$(function(){
+			//初始化选项行
+			findColumnDataInfo();
+		})
+		
+		var groupTitleObj = {};//分组名称
+		//初始化选项行
+		function findColumnDataInfo(){
+    		var columnDataList = listColDataBySheetId();//获取column_data
+    		var evaItemList = listEvaItemBySheetId();//获取eva_item
+    		
+    		$.each(columnDataList,function(index,colData){
+    			var groupTitle = colData.groupTitle;
+    			if(!isEmpty(groupTitle)) {
+    				var len = Object.keys(groupTitleObj).length;
+    				if(isEmpty(groupTitleObj[groupTitle])) {
+    	    			groupTitleObj[groupTitle] = len+1;
+    	    			//新加分组的框框
+    	    			listGroupXuanxiang(colData,evaItemList,len+1);//显示分组的项
+    	    		}else{
+    	    			//已存在分组框，只需添加项
+    	    			len = groupTitleObj[groupTitle];
+    	    			forAddEvaItem(colData,evaItemList,len);
+    	    		}
+        		}else{
+        			listXuanxiang(colData,evaItemList);//显示单项
+        		}
+    		})
+    	}
+		
+		//获取column_data
+    	function listColDataBySheetId(){
+    		var columnDataList = [];
+    		$.ajax({
+    			type:"post",
+    			url: ctx + "userbackground/columnData/listColDataBySheetId",
+    			data:{
+    				sheetId:sheetId,
+    			},
+    			async:false,
+    			success:function(data){
+    				columnDataList = data;
+    			}
+    		})
+    		return columnDataList;
+    	}
+    	
+    	//获取eva_item
+    	function listEvaItemBySheetId(){
+    		var evaItemList = [];
+    		$.ajax({
+    			type:"post",
+    			url: ctx + "userbackground/evaluateItem/listEvaItemBySheetId",
+    			data:{
+    				sheetId:sheetId,
+    			},
+    			async:false,
+    			success:function(data){
+    				evaItemList = data;
+    			}
+    		})
+    		return evaItemList;
+    	}
+    	
+    	//显示单项
+    	function listXuanxiang(colData,evaItemList){
+    		var str = '<div class="cp-item">';
+    		str += '<div class="cp-title">';
+    		str += '<p>'+colData.columnTitle+'</p>';
+    		str += '</div>';
+    		
+    		str += '<div class="pf-item">';
+    		$.each(evaItemList,function(index,evaItem){
+    			if(evaItem.columnDataId == colData.columnDataId && isEmpty(evaItem.groupTitle)){
+    				str += '<input type="radio" name="columnValue" value="'+evaItem.evaluateData+'" title="'+evaItem.evaluateValue+'"><span>'+evaItem.evaluateValue+'</span>';
+    			}
+    		})
+    		str += '</div>';
+    		str += '</div>';
+    		$(".col-data-info").append(str);
+    	}
+    	
+    	//显示分组的项
+    	function listGroupXuanxiang(colData,evaItemList,len){
+    		var groupTitle = colData.groupTitle;
+    		var str = '<div class="item-group">';
+    		str += '<div class="item-hd">'+groupTitle+'</div>';
+    		str += '<div class="cp-item group_col_'+len+'">';
+    		
+    		
+    		str += '<div class="cp-title">';
+    		str += '<p>'+colData.columnTitle+'</p>';
+    		str += '</div>';
+    		
+    		str += '<div class="pf-item">';
+    		$.each(evaItemList,function(index,evaItem){
+    			if(evaItem.columnDataId == colData.columnDataId){
+    				str += '<input type="radio" name="columnValue" value="'+evaItem.evaluateData+'" title="'+evaItem.evaluateValue+'"><span>'+evaItem.evaluateValue+'</span>';
+    			}
+    			
+    		})
+    		str += '</div>';
+    		str += '</div>';//group_col_的div
+    		
+    		str += '</div>';//item-group的div
+    		
+    		$(".col-data-info").append(str);
+    	}
+    	
+    	//已存在分组框，只需添加项
+    	function forAddEvaItem(colData,evaItemList,len){
+    		var str = '<div class="cp-title">';
+    		str += '<p>'+colData.columnTitle+'</p>';
+    		str += '</div>';
+    		
+    		str += '<div class="pf-item">';
+    		$.each(evaItemList,function(index,evaItem){
+    			if(evaItem.columnDataId == colData.columnDataId){
+    				str += '<input type="radio" name="columnValue" value="'+evaItem.evaluateData+'" title="'+evaItem.evaluateValue+'"><span>'+evaItem.evaluateValue+'</span>';
+    			}
+    			
+    		})
+    		str += '</div>';
+    		$(".group_col_"+len).append(str);
+    	}
+    </script>
+</body>
+</html>

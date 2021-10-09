@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('新增测评表格')" />
+    <link th:href="@{/css/web.css}" rel="stylesheet"/>
+    <link th:href="@{/css/userbackground/evaltable-css.css}" rel="stylesheet"/>
+    <style type="text/css">
+    </style>
+</head>
+<body class="white-bg" style="background-color:#F5F6F8">
+    <div class="mb-header tc c">
+		<div class="back-wrapper">
+<!--			<button type="button" class="btn btn-cp-info btn-sm" onclick="window.close()"><i class="iconfont">&#xe63f;</i> 返回</button>-->
+			<button type="button" class="btn btn-success btn-sm" onclick="returnto()"> 返回</button>
+		</div>
+		<div class="fc">
+			<button type="button" class="btn btn-success btn-sm" title="先保存，再预览" onclick="cpPreview()">预览</button>
+			<button type="button" class="btn btn-success btn-sm" onclick="saveRightSet()"> 保存</button>
+		</div>
+	</div>
+    <div class="h-class" style="width:30%; float:left;">
+        <div class="tabs-container h-class">
+
+            <div class="tabs-left h-class">
+                <ul class="nav nav-tabs h-class">
+					<li class="active"><a data-toggle="tab" href="#tab-3"><i class="iconfont">&#xe6c7;</i> <p>设置</p></a></li>
+					<li class=""><a data-toggle="tab" href="#tab-1"><i class="iconfont">&#xe636;</i> <p>编辑</p></a></li>
+					<li class=""><a data-toggle="tab" href="#tab-2"><i class="iconfont">&#xe66f;</i> <p>主题</p></a></li>
+
+                </ul>
+                <div class="tab-content ">
+                    <input type="hidden" id="sheetId" name="id" >
+                    <input type="hidden" id="columnDataId" name="columnDataId">
+                    <div id="tab-1" class="tab-pane">
+                        <div class="panel-body">
+                            <form id="form-eval-add">
+	                            <div class="form-group">    
+					                <label class="col-sm-12 control-label">标题 </label>
+					                <div class="col-sm-12">
+					                    <input id="evaluateTitle" name="evaluateTitle" class="form-control" type="text" placeholder="请输入"
+												autocomplete="off">
+					                </div>
+					            </div>
+					            <div class="form-group">    
+					                <label class="col-sm-12 control-label m-t">选项 </label>
+					                <div id="eval-item">
+					                </div>
+					                <div class="col-sm-12" style="margin-top:5px;">
+					                	<button type="button" class="btn btn-success btn-xs" onclick="addEvalRow()"><i class="fa fa-plus-circle"></i> 增加一行</button>
+					                </div>
+					            </div>
+					            <div class="form-group">    
+					                <label class="col-sm-12 control-label m-t">分组(选填) </label>
+					                <div class="col-sm-12">
+					                    <input id="groupTitle" name="groupTitle" class="form-control" type="text" placeholder="请输入"
+												autocomplete="off">
+					                </div>
+					            </div>
+					            <div class="form-group">    
+					                <div class="col-sm-12 m-t">
+					                	<button type="button" class="btn btn-success btn-sm" onclick="saveEvalItemInfo()" style="width:100%;"> 保存</button>
+				                	</div>
+					            </div>
+				            </form>
+                        </div>
+                    </div>
+                    <div id="tab-2" class="tab-pane">
+                        <div class="panel-body">
+                        	<div class="form-group">    
+				                <label class="col-sm-12 control-label">封面图片： </label>
+				                <div class="col-sm-12">
+				                    <input type="file" class="form-control" id="coverPath" name="coverPath" accept="image/*">
+				                </div>
+				                <div class="col-sm-12" style="margin-top:5px;">
+				                	<button type="button" class="btn btn-success btn-xs" onclick="uploadFile('cover')" style="width:25%;"> 提交</button>
+				                </div>
+				            </div>
+				            <div class="form-group">    
+				                <label class="col-sm-12 control-label m-t">网页背景： </label>
+				                <div class="col-sm-12">
+				                    <input type="file" class="form-control" id="backPath" name="backPath" accept="image/*">
+				                </div>
+				                <div class="col-sm-12" style="margin-top:5px;">
+				                	<button type="button" class="btn btn-success btn-xs" onclick="uploadFile('back')" style="width:25%;"> 提交</button>
+				                </div>
+				            </div>
+				            <div class="form-group">    
+				                <label class="col-sm-12 control-label m-t">主题选择： </label>
+				                <div class="col-sm-12">
+				                	<input type="hidden" id="subjectPath">
+					                <button type="button" class="btn btn-primary btn-lg" onclick="setSubject('btn-primary')"></button>
+					                <button type="button" class="btn btn-success btn-lg" onclick="setSubject('btn-success')"></button>
+					                <button type="button" class="btn btn-info btn-lg" onclick="setSubject('btn-info')"></button>
+					                <button type="button" class="btn btn-warning btn-lg" onclick="setSubject('btn-warning')"></button>
+					                <button type="button" class="btn btn-danger btn-lg" onclick="setSubject('btn-danger')"></button>
+				                </div>
+				            </div>
+				            <div class="form-group">    
+				                <div class="col-sm-12 m-t">
+				                	<button type="button" class="btn btn-success btn-sm" onclick="saveSubject()" style="width:70%;"> 保存</button>
+				                	<button type="button" class="btn btn-success btn-sm" style="width:25%;" onclick="cpPreview()"> 预览</button>
+			                	</div>
+				            </div>
+                        </div>
+                    </div>
+                    <div id="tab-3" class="tab-pane active">
+                        <div class="panel-body">
+                            <form id="form-sheet-add" class="">
+	                            <div class="form-group">    
+					                <label class="col-sm-12 control-label">标题 </label>
+					                <div class="col-sm-12">
+					                    <input name="name" class="form-control" type="text" placeholder="请输入"
+												autocomplete="off">
+					                </div>
+					            </div>
+					            <div class="form-group">    
+					                <label class="col-sm-12 control-label m-t">填表说明 </label>
+					                <div class="col-sm-12">
+					                    <textarea name="tableExplain" class="form-control" style="width:100%; height: 76px; resize:none;"></textarea>
+					                </div>
+					            </div>
+					            <div class="form-group">    
+					                <label class="col-sm-12 control-label m-t">对象类别 </label>
+					                <div class="col-sm-12">
+					                	<input type="radio" name="objType" value="1" title="单位/部门" checked><span>单位/部门</span>
+										<input type="radio" name="objType" value="0" title="个人"><span>个人</span>
+					                </div>
+					            </div>
+					            <div class="form-group">    
+					                <label class="col-sm-12 control-label m-t">评价类型 </label>
+					                <div class="col-sm-12">
+					                	<input type="radio" name="evaType" value="0" title="正向测评" checked><span>正向测评</span>
+										<input type="radio" name="evaType" value="1" title="反向测评"><span>反向测评</span>
+					                </div>
+					            </div>
+				            </form>
+				            <div class="form-group">    
+				                <div class="col-sm-12 m-t">
+				                	<button type="button" class="btn btn-success btn-sm" style="width:100%;" onclick="saveSheetBaseInfo()"> 保存</button>
+			                	</div>
+				            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+    
+    <!-- 右侧信息 -->
+    <div class="mb-wrap">
+		<div class="mb-box">
+			<div id="act-item">
+				<!-- js的addXuxiang()方法动态添加 -->
+			</div>
+			<div class="select-item btn-box" style="text-align:center;">
+				<button type="button" class="btn btn-success btn-sm">
+					保存
+				</button>
+			</div>
+		</div>
+	</div>
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+        var prefix = ctx + "userbackground/evaluation"
+        //验证设置信息
+        $("#form-sheet-add").validate({
+            focusCleanup: true,
+            rules:{
+            	name:{
+            		required:true,
+            	}
+            },
+            messages:{
+            	name:{
+            		required:'必填',
+            	}
+            },
+        });
+        
+        //验证选项信息
+        $("#form-eval-add").validate({
+            focusCleanup: true,
+            rules:{
+            	evaluateTitle:{
+            		required:true,
+            	},
+            	evaluateValue:{
+            		required:true,
+            	},
+            	evaluateData:{
+            		required:true,
+					number:true
+            	}
+            },
+            messages:{
+            	evaluateTitle:{
+            		required:'必填',
+            	},
+            	evaluateValue:{
+            		required:'必填',
+            	},
+            	evaluateData:{
+            		required:'必填',
+					digits:'数字'
+            	}
+            },
+        });
+        
+        $(function(){
+        	initEvalItemList();//初始化选项行
+        })
+        
+        //初始化选项行
+        function initEvalItemList(){
+        	var evalValueDiv1 = '<div style="float:left;width:57%;">';
+        	evalValueDiv1 += '<input name="evaluateValue" class="form-control" type="text" placeholder="如:好" autocomplete="off">';
+        	evalValueDiv1 += '</div>';
+        	
+        	var evalValueDiv2 = '<div style="float:left;width:57%;">';
+        	evalValueDiv2 += '<input name="evaluateValue" class="form-control" type="text" placeholder="如:较好" autocomplete="off">';
+        	evalValueDiv2 += '</div>';
+        	
+        	var evalValueDiv3 = '<div style="float:left;width:57%;">';
+        	evalValueDiv3 += '<input name="evaluateValue" class="form-control" type="text" placeholder="如:一般" autocomplete="off">';
+        	evalValueDiv3 += '</div>';
+        	
+        	var evalValueDiv4 = '<div style="float:left;width:57%;">';
+        	evalValueDiv4 += '<input name="evaluateValue" class="form-control" type="text" placeholder="如:差" autocomplete="off">';
+        	evalValueDiv4 += '</div>';
+        	
+        	//分值的div
+        	var evalDataDiv = '<div style="float:left;width:30%;">';
+        	evalDataDiv += '<input name="evaluateData" class="form-control" type="text" placeholder="分值" autocomplete="off">';
+        	evalDataDiv += '</div>';
+        	
+        	//删除按钮的div
+        	var delBtnDiv = '<div style="float:left;width:13%;">';
+        	delBtnDiv += '<button type="button" class="btn-icon2" onclick="delItemRow(this)"><i class="iconfont">&#xe641;</i></button>';
+        	delBtnDiv += '</div>';
+        	
+        	var itemDiv = '<div class="col-sm-12">'+evalValueDiv1+evalDataDiv+delBtnDiv+'</div>';
+        	itemDiv += '<div class="col-sm-12">'+evalValueDiv2+evalDataDiv+delBtnDiv+'</div>';
+        	itemDiv += '<div class="col-sm-12">'+evalValueDiv3+evalDataDiv+delBtnDiv+'</div>';
+        	itemDiv += '<div class="col-sm-12">'+evalValueDiv4+evalDataDiv+delBtnDiv+'</div>';
+        	
+        	$("#eval-item").html(itemDiv);
+    		
+        }
+        
+        //选项--增加一行
+        function addEvalRow(){
+        	if (!$("#form-eval-add").valid()){
+        		return false;
+        	}
+        	//选项值
+        	var evalValueDiv = '<div style="float:left;width:50%;">';
+        	evalValueDiv += '<input name="evaluateValue" class="form-control" type="text" placeholder="如:好" autocomplete="off">';
+        	evalValueDiv += '</div>';
+        	
+        	//分值的div
+        	var evalDataDiv = '<div style="float:left;width:30%;">';
+        	evalDataDiv += '<input name="evaluateData" class="form-control" type="text" placeholder="分值" autocomplete="off">';
+        	evalDataDiv += '</div>';
+        	
+        	//删除按钮的div
+        	var delBtnDiv = '<div style="float:left;width:20%;">';
+        	delBtnDiv += '<button type="button" class="btn-icon2" onclick="delItemRow(this)"><i class="iconfont">&#xe641;</i></button>';
+        	delBtnDiv += '</div>';
+        	
+        	var itemDiv = '<div class="col-sm-12">'+evalValueDiv+evalDataDiv+delBtnDiv+'</div>';
+        	
+        	$("#eval-item").append(itemDiv);
+        }
+        
+        //删除选项行
+        function delItemRow(obj){
+        	$(obj).parent().parent().remove();
+        }
+
+        //保存设置信息
+        function saveSheetBaseInfo(){
+        	var sheetId = $("#sheetId").val();
+        	var obj = serializeObject($('#form-sheet-add'));
+        	if(!isEmpty(sheetId)){
+        		obj.id = sheetId;
+        	}
+        	
+        	if ($("#form-sheet-add").valid()) {
+        		$.ajax({
+                	type:"post",
+                	url:prefix + "/add",
+                	data:obj,
+                	success:function(data){
+                		if(!isEmpty(data)){
+                			$("#sheetId").val(data);
+                			$.modal.msgSuccess("保存成功");
+                		}else{
+                			$.modal.msgError("保存失败，请联系管理员");
+                		}
+                		
+                	}
+                })
+            }
+        }
+        
+        //保存选项信息
+        function saveEvalItemInfo(){
+        	var sheetId = $("#sheetId").val();
+        	if(isEmpty(sheetId)) {
+        		$.modal.alertWarning("请先保存设置信息");
+        		return false;
+        	}
+        	if (!$("#form-eval-add").valid()){
+        		return false;
+        	}
+        	
+        	var columnDataId = $("#columnDataId").val();
+        	if(isEmpty(columnDataId)){
+        		//保存columnData-获取columnDataId
+            	saveColumnDataInfo();
+            	
+            	//保存eval_item选项信息
+            	saveEvalIntemInfo();
+        	}else {
+        		//编辑-保存columnData-获取columnDataId
+            	editColumnDataInfo();
+        		
+            	//保存eval_item选项信息
+            	saveEvalIntemInfo('edit');//编辑后保存的，清空左侧数据，避免第二次
+        	}
+        	
+        	//调整右侧页面
+        	//addXuxiang();
+        	//调整右侧页面
+        	$("#act-item").html('');
+        	groupTitleObj = {};
+        	findColumnDataInfo();
+        	
+        }
+        
+      	//保存columnData-获取columnDataId
+    	function saveColumnDataInfo(){
+      		var sheetId = $("#sheetId").val();
+    		var evaluateTitle = $("#evaluateTitle").val();
+      		$.ajax({
+        		type:"post",
+        		url: ctx + "userbackground/columnData/add",
+        		data:{
+        			sheetId:sheetId,
+        			columnTitle:evaluateTitle,
+        		},
+        		async:false,
+        		success:function(data){
+        			if(!isEmpty(data)){
+            			$("#columnDataId").val(data);
+            		}else{
+            			$.modal.msgError("保存失败，请联系管理员");
+            		}
+        		}
+        	})
+      	}
+      	
+    	//编辑-保存columnData-获取columnDataId
+    	function editColumnDataInfo(){
+    		var sheetId = $("#sheetId").val();
+    		var evaluateTitle = $("#evaluateTitle").val();
+    		var columnDataId = $("#columnDataId").val();
+      		$.ajax({
+        		type:"post",
+        		url: ctx + "userbackground/columnData/edit",
+        		data:{
+        			sheetId:sheetId,
+        			columnTitle:evaluateTitle,
+        			columnDataId:columnDataId,
+        		},
+        		async:false,
+        		success:function(data){
+        			if(data.code == 0){
+        				console.log("列编辑成功")
+            		}else{
+            			$.modal.msgError("保存失败，请联系管理员");
+            		}
+        		}
+        	})
+    	}
+      	
+    	//保存eval_item选项信息
+    	function saveEvalIntemInfo(type){
+    		var sheetId = $("#sheetId").val();
+    		var columnDataId = $("#columnDataId").val();
+    		var evaList = [];
+        	$("#eval-item").children().each(function(index){
+        		var evaObj = {};
+        		var evaluateValue = $(this).find('input[name="evaluateValue"]').val();
+        		var evaluateData = $(this).find('input[name="evaluateData"]').val();
+        		
+        		evaObj.evaluateValue = evaluateValue;
+        		evaObj.evaluateData = evaluateData;
+        		evaObj.evaluateSort = index + 1;
+        		
+        		evaList.push(evaObj);
+        	})
+        	var obj = serializeObject($('#form-eval-add'));
+        	obj.sheetId = sheetId;
+        	obj.columnDataId = columnDataId;
+        	obj.evaListStr = JSON.stringify(evaList);
+        	
+        	$.ajax({
+        		type:"post",
+        		url: ctx + "userbackground/evaluateItem/add",
+        		data:obj,
+        		async:false,
+        		success:function(data){
+        			console.log(data);
+        			if(data.code == 0){
+        				$.modal.msgSuccess("保存成功");
+        				$("#columnDataId").val('');
+        				
+        				//编辑后保存的，清空左侧数据，避免第二次提交时新增
+        				if(type=="edit"){
+        					initEvalItemList();
+        					$("#evaluateTitle").val("");
+        					$("#groupTitle").val("");
+        				}
+        			}else{
+        				$.modal.msgError("保存失败，请联系管理员");
+        			}
+        		}
+        	})
+    	}
+    	
+    	//上传图片---cover(封面)/back(背景)；
+    	function uploadFile(pathType) {
+    		var sheetId = $("#sheetId").val();
+        	if(isEmpty(sheetId)) {
+        		$.modal.alertWarning("请先保存设置信息");
+        		return false;
+        	}
+        	
+        	var formData = new FormData();
+        	if(pathType == 'cover') {
+        		formData.append('file', $('#coverPath')[0].files[0]);
+        	}else if (pathType == 'back') {
+        		formData.append('file', $('#backPath')[0].files[0]);
+        	}
+        	formData.append('sheetId', sheetId);
+        	formData.append('pathType', pathType);
+        	$.ajax({
+        		url: prefix + "/uploadFile",
+        		type: 'post',
+        		cache: false,
+        		data: formData,
+        		processData: false,
+        		contentType: false,
+        		dataType: "json",
+        		success:function(data){
+        			if(data.code == 0){
+        				$.modal.msgSuccess('提交成功');
+        			}else {
+        				$.modal.msgError('提交失败，请联系管理员');
+        			}
+        		}
+        	})
+        	
+    	}
+    	
+    	//选择主题
+    	function setSubject(btn){
+    		$("#subjectPath").val(btn);
+    	}
+    	
+    	//保存主题部分信息
+    	function saveSubject() {
+    		var sheetId = $("#sheetId").val();
+    		var subjectPath = $("#subjectPath").val();
+    		if(isEmpty(sheetId)) {
+        		$.modal.alertWarning("请先保存设置信息");
+        		return false;
+        	}
+    		$.ajax({
+            	type:"post",
+            	url:prefix + "/edit",
+            	data:{
+            		id:sheetId,
+            		subjectPath:subjectPath
+            	},
+            	success:function(data){
+            		if(data.code == 0){
+            			$.modal.msgSuccess("保存成功");
+            		}else{
+            			$.modal.msgError("保存失败，请联系管理员");
+            		}
+            		
+            	}
+            })
+    		
+    	}
+    	
+    	var groupTitleObj = {};//分组名称(全局变量)
+    	//保存之后，查询右侧显示之前保存过的column_data和eval_item数据
+    	function findColumnDataInfo(){
+    		var columnDataList = listColDataBySheetId();//获取column_data
+    		var evaItemList = listEvaItemBySheetId();//获取eva_item
+    		
+    		$.each(columnDataList,function(index,colData){
+    			var groupTitle = colData.groupTitle;
+    			if(!isEmpty(groupTitle)) {
+    				var len = Object.keys(groupTitleObj).length;
+    				if(isEmpty(groupTitleObj[groupTitle])) {
+    	    			groupTitleObj[groupTitle] = len+1;
+    	    			//新加分组的框框
+    	    			listGroupXuanxiang(colData,evaItemList,len+1);//显示分组的项
+    	    		}else{
+    	    			//已存在分组框，只需添加项
+    	    			len = groupTitleObj[groupTitle];
+    	    			forAddEvaItem(colData,evaItemList,len);
+    	    		}
+        		}else{
+        			listXuanxiang(colData,evaItemList);//显示单项
+        		}
+    		})
+    	}
+    	
+    	//显示单项
+    	function listXuanxiang(colData,evaItemList){
+    		var str = '<div class="select-item">';
+    		str += '<div class="btn-group">';
+    		str += '<button class="btn-icon" onclick="moveUp(this)"><i class="iconfont">&#xe644;</i><span>上移</span></button>';
+    		str += '<button class="btn-icon" onclick="moveDown(this)"><i class="iconfont">&#xe62a;</i><span>下移</span></button>';
+    		str += '<button class="btn-icon" onclick="copyColDataDiv(this,\''+colData.columnDataId+'\',\'\')"><i class="iconfont">&#xe6a2;</i><span>复制</span></button>';
+    		str += '<button class="btn-icon" onclick="editColDataDiv(this,\''+colData.columnDataId+'\',\'\',\''+colData.columnTitle+'\')"><i class="iconfont">&#xe850;</i><span>编辑</span></button>';
+    		str += '<button class="btn-icon" onclick="delColDataDiv(this,\''+colData.columnDataId+'\',\'\')"><i class="iconfont">&#xe617;</i><span>删除</span></button>';
+    		str += '</div>';
+    		
+    		str += '<div class="select-title col-title-div" colDataId="'+colData.columnDataId+'">';
+    		str += '<h5>'+colData.columnTitle+'</h5>';
+    		str += '</div>';
+    		
+    		str += '<div class="select-body">';
+    		
+    		$.each(evaItemList,function(index,evaItem){
+    			if(evaItem.columnDataId == colData.columnDataId && isEmpty(evaItem.groupTitle)){
+    				str += '<input type="radio" name="columnValue" value="'+evaItem.evaluateData+'" title="'+evaItem.evaluateValue+'"><span>'+evaItem.evaluateValue+'</span>';
+    			}
+    			
+    		})
+    		str += '<div class="c"></div>';
+    		str += '</div>';
+    		str += '</div>';
+    		
+    		$("#act-item").append(str);
+    	}
+    	
+    	//显示分组的项
+    	function listGroupXuanxiang(colData,evaItemList,len){
+    		var groupTitle = colData.groupTitle;
+    		var str = '<div class="item-group">';
+    		str += '<div class="btn-group">';
+    		str += '<button class="btn-icon" onclick="moveUp(this)"><i class="iconfont">&#xe644;</i><span>上移</span></button>';
+    		str += '<button class="btn-icon" onclick="moveDown(this)"><i class="iconfont">&#xe62a;</i><span>下移</span></button>';
+    		str += '<button class="btn-icon" onclick="copyColDataDiv(this,\''+colData.columnDataId+'\',\''+groupTitle+'\')"><i class="iconfont">&#xe6a2;</i><span>复制</span></button>';
+    		str += '<button class="btn-icon dropdown-toggle" data-toggle="dropdown"><i class="iconfont">&#xe850;</i><span>编辑</span></button>';
+    		//分组的编辑
+    		str +='<ul class="dropdown-menu dropdown-user edit_ul_'+len+'">';
+            str +='<li><a href="javascript:void(0)" onclick="editColDataDiv(this,\''+colData.columnDataId+'\',\''+groupTitle+'\',\''+colData.columnTitle+'\')">'+colData.columnTitle+'</a></li>';
+            str +='</ul>';
+    		
+    		str += '<button class="btn-icon" onclick="delColDataDiv(this,\''+colData.columnDataId+'\',\''+groupTitle+'\')"><i class="iconfont">&#xe617;</i><span>删除</span></button>';
+    		str += '</div>';
+    		str += '<div class="item-hd">'+groupTitle+'</div>';
+    		str += '<div class="item-bd group_col_'+len+'">';
+    		
+    		str += '<div class="cp-title col-title-div" colDataId="'+colData.columnDataId+'">';
+    		str += '<p>'+colData.columnTitle+'</p>';
+    		str += '</div>';
+    		
+    		str += '<div class="pf-item">';
+    		
+    		$.each(evaItemList,function(index,evaItem){
+    			if(evaItem.columnDataId == colData.columnDataId){
+    				str += '<input type="radio" name="columnValue" value="'+evaItem.evaluateData+'" title="'+evaItem.evaluateValue+'"><span>'+evaItem.evaluateValue+'</span>';
+    			}
+    			
+    		})
+    		str += '</div>';
+    		
+    		
+    		str += '</div>';//group_col_的div
+    		
+    		str += '</div>';//item-group的div
+    		
+    		$("#act-item").append(str);
+    	}
+    	
+    	//已存在分组框，只需添加项
+    	function forAddEvaItem(colData,evaItemList,len){
+    		var editLi = '<li><a href="javascript:void(0)" onclick="editColDataDiv(this,\''+colData.columnDataId+'\',\''+colData.groupTitle+'\',\''+colData.columnTitle+'\')">'+colData.columnTitle+'</a></li>';
+    		$(".edit_ul_"+len).append(editLi);
+    		
+    		var str = '<div class="cp-title col-title-div" colDataId="'+colData.columnDataId+'">';
+    		str += '<p>'+colData.columnTitle+'</p>';
+    		str += '</div>';
+    		
+    		str += '<div class="pf-item">';
+    		
+    		$.each(evaItemList,function(index,evaItem){
+    			if(evaItem.columnDataId == colData.columnDataId){
+    				str += '<input type="radio" name="columnValue" value="'+evaItem.evaluateData+'" title="'+evaItem.evaluateValue+'"><span>'+evaItem.evaluateValue+'</span>';
+    			}
+    			
+    		})
+    		str += '</div>';
+    		$(".group_col_"+len).append(str);
+    	}
+    	
+    	//获取column_data
+    	function listColDataBySheetId(){
+    		var sheetId = $("#sheetId").val();
+    		var columnDataList = [];
+    		$.ajax({
+    			type:"post",
+    			url: ctx + "userbackground/columnData/listColDataBySheetId",
+    			data:{
+    				sheetId:sheetId,
+    			},
+    			async:false,
+    			success:function(data){
+    				columnDataList = data;
+    			}
+    		})
+    		return columnDataList;
+    	}
+    	
+    	//获取eva_item
+    	function listEvaItemBySheetId(){
+    		var sheetId = $("#sheetId").val();
+    		var evaItemList = [];
+    		$.ajax({
+    			type:"post",
+    			url: ctx + "userbackground/evaluateItem/listEvaItemBySheetId",
+    			data:{
+    				sheetId:sheetId,
+    			},
+    			async:false,
+    			success:function(data){
+    				evaItemList = data;
+    			}
+    		})
+    		return evaItemList;
+    	}
+    	
+    	//根据colDataId获取eva_item
+    	function listEvaItemByColDataId(){
+    		var colDataId = $("#columnDataId").val();
+    		var evaItemList = [];
+    		$.ajax({
+    			type:"post",
+    			url: ctx + "userbackground/evaluateItem/listEvaItemByColDataId",
+    			data:{
+    				colDataId:colDataId,
+    			},
+    			async:false,
+    			success:function(data){
+    				evaItemList = data;
+    			}
+    		})
+    		return evaItemList;
+    	}
+        
+    	//预览
+    	function cpPreview(){
+    		var sheetId = $("#sheetId").val();
+    		if(isEmpty(sheetId)) {
+        		$.modal.alertWarning("请先保存设置信息");
+        		return false;
+        	}
+    		window.open(ctx + "userbackground/previewpage/cpPreview?sheetId="+sheetId);
+    	}
+    	
+    	/***************右侧(上移，下移，复制，编辑，删除)方法-----目前（复制，编辑，删除直接操作后台方法，改数据库数据）************************************/
+    	//删除div框
+    	function delColDataDiv(obj,colDataId,groupTitle){
+    		var sheetId = $("#sheetId").val();
+    		$.ajax({
+    			type:"post",
+    			url:ctx+"userbackground/columnData/delColDataItemInfo",
+    			data:{
+    				colDataId:colDataId,
+    				sheetId:sheetId,
+    				groupTitle,
+    			},
+    			async:false,
+    			success:function(data){
+    				if(data.code == 0){
+    					$(obj).parent().parent().remove();
+    					$.modal.msgSuccess("已删除");
+    				}else{
+    					$.modal.msgError("删除的项没成功，请联系管理员");
+    				}
+    			}
+    		})
+    	}
+    	
+    	
+    	
+    	//编辑div
+    	function editColDataDiv(obj,colDataId,groupTitle,colTitle){
+    		$("#columnDataId").val(colDataId);
+    		$("#evaluateTitle").val(colTitle);
+    		$("#groupTitle").val(groupTitle);
+    		var evaItemList = listEvaItemByColDataId();//根据colDataId获取eva_item
+    		var itemDiv = '';
+    		
+    		//遍历查询的相关选项
+    		$.each(evaItemList,function(index,evaItem){
+    			var evaValue = evaItem.evaluateValue;
+    			var evaData = evaItem.evaluateData;
+    			
+    			//选项值
+            	var evalValueDiv = '<div style="float:left;width:50%;">';
+            	evalValueDiv += '<input name="evaluateValue" value="'+evaValue+'" class="form-control" type="text" placeholder="如:好" autocomplete="off">';
+            	evalValueDiv += '</div>';
+            	
+            	//分值的div
+            	var evalDataDiv = '<div style="float:left;width:30%;">';
+            	evalDataDiv += '<input name="evaluateData" value="'+evaData+'" class="form-control" type="text" placeholder="分值" autocomplete="off">';
+            	evalDataDiv += '</div>';
+            	
+            	//删除按钮的div
+            	var delBtnDiv = '<div style="float:left;width:20%;">';
+            	delBtnDiv += '<button type="button" class="btn-icon2" onclick="delItemRow(this)"><i class="iconfont">&#xe641;</i></button>';
+            	delBtnDiv += '</div>';
+            	
+            	itemDiv += '<div class="col-sm-12">'+evalValueDiv+evalDataDiv+delBtnDiv+'</div>';
+    		})
+    		
+    		$("#eval-item").html(itemDiv);
+    	}
+    	
+    	//复制div
+    	function copyColDataDiv(obj,colDataId,groupTitle){
+    		var newGroupTitle = "";
+    		if(!isEmpty(groupTitle)) {
+    			layer.prompt({title: '请输入新的分组名称(不能和原名重复)', formType: 0}, function(text, index){
+      	    	    if(groupTitle == text){
+      	    	    	layer.msg('新分组名不能和原名重复！');
+      	    	    	return false;
+      	    	    }
+    				layer.close(index);
+      	    	    newGroupTitle = text;
+      	    	    copyColDataItemInfo(obj,colDataId,groupTitle,newGroupTitle);
+      	    	});
+    		}else {
+    			copyColDataItemInfo(obj,colDataId,groupTitle,newGroupTitle);
+    		}
+    		
+    	}
+    	//复制div时调用的方法(如果不单写出来，就要在上面的方法里写两遍)
+    	function copyColDataItemInfo(obj,colDataId,groupTitle,newGroupTitle){
+    		var sheetId = $("#sheetId").val();
+    		$.ajax({
+    			type:"post",
+    			url:ctx+"userbackground/columnData/copyColDataItemInfo",
+    			data:{
+    				colDataId:colDataId,
+    				sheetId:sheetId,
+    				groupTitle:groupTitle,
+    				newGroupTitle:newGroupTitle,
+    			},
+    			async:false,
+    			success:function(data){
+    				if(data.code == 0){
+    					//因为要重新加载右侧框，div和分组名称置空
+    					$("#act-item").html('');
+    					groupTitleObj = {};
+    					findColumnDataInfo();//调用刚进入页面时的方法
+    					$.modal.msgSuccess("已复制");
+    				}else{
+    					$.modal.msgError("复制的项没成功，请联系管理员");
+    				}
+    			}
+    		})
+    	}
+    	
+    	//上移
+    	function moveUp(obj){
+    		var e = $(obj).parent().parent();
+    		
+    		//长度==0，则没有上级级节点，不用下移
+    		if(e.prev().length > 0) {
+    			e.prev().insertAfter(e);
+    		}
+    	}
+    	
+    	//下移
+    	function moveDown(obj){
+    		var e = $(obj).parent().parent();
+    		
+    		//长度==0，则没有下级节点，不用下移
+    		if(e.next().length > 0) {
+    			e.next().insertBefore(e);
+    		}
+    	}
+    	
+    	//上层保存--保存右侧调整后的数据
+    	function saveRightSet() {
+			// console.log("保存--等上下移功能完善的");
+			// setTimeout(function(){return window.close();},"1500");
+			var arr = "";
+			$("div.col-title-div").each(function(){
+				arr += $(this).attr("coldataId")+",";
+			})
+			$.ajax({
+				type:"post",
+				url:ctx+"userbackground/columnData/update_down_up",
+				data:{
+					"arrid":arr,
+				},
+				success:function(data){
+					$.modal.msgSuccess("保存成功");
+					setTimeout(function(){return window.close();},"1500")
+				}
+			})
+    	}
+    	//返回
+		function returnto(){
+    		location.href = ctx + "userbackground/evaluation";
+		}
+    </script>
+</body>
+</html>

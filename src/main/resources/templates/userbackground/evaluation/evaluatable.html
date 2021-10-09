@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('测评表格列表')" />
+    
+    <style type="text/css">
+    	.th-inner {
+    		    font-size: 14px;
+			    color: #040404;
+			    font-weight: bold;
+    	}
+    </style>
+</head>
+<body class="gray-bg">
+     <div class="container-div">
+        <div class="row">
+            <div class="col-sm-12 search-collapse">
+                <form id="formId">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                <label>名称：</label>
+                                <input type="text" name="name"/>
+                            </li>
+                            <li>
+                                <label>创建人：</label>
+                                <input type="text" name="operateId"/>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+
+            <div class="btn-group-sm" id="toolbar" role="group">
+                <a class="btn btn-success" onclick="addSheetPage()" shiro:hasPermission="userbackground:evaluation:add">
+                    <i class="fa fa-plus-circle"></i> 新建表格
+                </a>
+            </div>
+            <div class="col-sm-12 select-table table-striped">
+                <table id="bootstrap-table"></table>
+            </div>
+        </div>
+    </div>
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('userbackground:evaluation:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('userbackground:evaluation:remove')}]];
+        var prefix = ctx + "userbackground/evaluation";
+
+        var sheetObjType = [[${@dict.getType('sheet_obj_type')}]];
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                exportUrl: prefix + "/export",
+                showSearch: false,
+                showRefresh: false,
+                showColumns: false,
+                showToggle: false,
+                modalName: "测评表格",
+                sortName: "createTime",
+                sortOrder: "desc",
+                columns: [
+                {
+                    field: 'id',
+                    title: '',
+                    visible: false
+                },
+                {
+                    field: 'name',
+                    title: '模板名称',
+                },
+                {
+                    field: 'objType',
+                    title: '对象类型',
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(sheetObjType, value);
+                    }
+                },
+                {
+                    field: 'operateName',
+                    title: '创建人',
+                },
+                {
+                    field: 'createTime',
+                    title: '创建日期',
+                    sortable:true,
+                    formatter: function(value){
+                    	return dateStrToFormatDate(value);
+                    }
+                },
+                {
+                    title: '操作',
+                    formatter: function(value, row, index) {
+                        var actions = [];
+                        actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="editSheetPage(\'' + row.id + '\')"><i class="fa fa-edit"></i> 编辑</a> ');
+                        actions.push('<a class="btn btn-success btn-xs " href="javascript:void(0)" onclick="copySheetInfo(\'' + row.id + '\')"><i class="fa fa-plus-square-o"></i> 复制</a> ');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="delSheetData(\'' + row.id + '\')"><i class="fa fa-remove"></i> 删除</a>');
+                        return actions.join('');
+                    }
+                }]
+            };
+            $.table.init(options);
+        });
+        
+        //新建表格
+        function addSheetPage(){
+        	// window.open(prefix + "/add");
+            location.href = prefix + "/add";
+        }
+        
+        //编辑表格
+        function editSheetPage(id){
+        	// window.open(prefix + "/edit?id="+id);
+            location.href = prefix + "/edit?id="+id;
+        }
+        
+        //删除表格及表格下所有数据
+        function delSheetData(id){
+        	$.modal.confirm("删除后无法恢复，确认要删除评测表格吗？", function() {
+        		var data = { "id": id };
+                $.operate.submit(prefix + "/delSheetData", "post", "json", data);
+		    })
+        }
+        
+        //复制
+        function copySheetInfo(id){
+        	$.modal.confirm("确认要复制模板吗？", function() {
+        		$.ajax({
+        			type:"post",
+        			url:prefix + "/copySheetAllInfo",
+        			data:{
+        				id:id
+        			},
+        			success:function(data){
+        				if(data.code == 0){
+        					$.modal.msgSuccess('复制成功');
+        					$.table.search();
+        				}else{
+        					$.modal.msgError('复制失败，请联系管理员');
+        				}
+        			}
+        		})
+		    })
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('左右互选组件')"/>
+    <th:block th:include="include :: bootstrap-editable-css"/>
+    <style>
+        .fixed-table-toolbar {
+            display: none;
+        }
+
+        li {
+            list-style-type: none;
+        }
+    </style>
+</head>
+<body class="white-bg">
+<div class="btn-group-sm" role="group" style="margin:1%;">
+    <a class="btn btn-success" onclick="returnto()"> 返回</a>
+</div>
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+<!--    <div class="row">-->
+        <div class="col-sm-12 select-table table-striped">
+            <table id="bootstrap-table"></table>
+        </div>
+<!--    </div>-->
+    <a class="btn btn-success" onclick="savesure()" style="margin-top: 2%;margin-left: -0.5%;"> 确认</a>
+</div>
+<th:block th:include="include :: footer"/>
+<th:block th:include="include :: bootstrap-table-editable-js"/>
+<script th:inline="javascript">
+    var sheetid = [[${sheetid}]];
+    var objType = [[${objType}]];//0:个人1：部门
+    var activityId = [[${activityId}]];
+
+    $(function () {
+
+        initTable();//初始化表格
+    })
+
+    //初始化表格
+    function initTable() {
+        var options = {
+            url: ctx + "userbackground/rules/selectAllJfRulesList",
+            showSearch: false,
+            showRefresh: false,
+            showToggle: false,
+            showColumns: false,
+            pagination: false,
+            columns: [{
+                field: 'ch',
+                checkbox: true,
+                formatter: function (value, row, index) {
+                    var obj = {};
+                    if (!isEmpty(row.sRankId)) {
+                        obj = {
+                            checked: true,
+                        };
+                    }
+                    return obj;
+                }
+              },
+              {
+                  field: 'id',
+                  title: '',
+                  visible: false
+              },
+              {
+                  field: 'rankId',
+                  title: '',
+                  visible: false
+              },
+              {
+                  field: 'rankName',
+                  title: '职级',
+              },
+              {
+                  field: 'fraction',
+                  title: '分值占比',
+                  editable: {
+                      type: 'text',
+                      title: '分值占比',
+                      emptytext: "点击设置",
+                      // validate : function(value) {
+                      //   if (value.length == 0) {
+                      //     return '名称不能为空';
+                      //   }
+                      // }
+                },
+                formatter:function(value){
+                      //不知道后端写好，还是前端写好
+                      if(isEmpty(value)){
+                          return '';
+                      }else{
+                          return value;
+                      }
+                }
+            }],
+            queryParams: function (params) {
+                params.activityId = activityId;
+                params.sheetId = sheetid;
+                return params;
+            }
+        };
+        $.table.init(options);
+    }
+
+    //确认保存
+    function savesure() {
+        var data = $("#" + table.options.id).bootstrapTable('getData');
+        var saveData = [];
+        var editData = [];
+        var delIds = "";
+        $.each(data, function (index, row) {
+            if (row.ch == true && isEmpty(row.id)) {
+                var saveRow = {};
+                saveRow.activityId = activityId;
+                saveRow.sheetId = sheetid;
+                saveRow.rankId = row.rankId;
+                saveRow.fraction = row.fraction;
+                saveRow.sheetType = objType;
+                saveData.push(saveRow);
+            }
+            if (row.ch == true && !isEmpty(row.id)) {
+                var editRow = {};
+                editRow.activityId = activityId;
+                editRow.sheetId = sheetid;
+                editRow.rankId = row.rankId;
+                editRow.fraction = row.fraction;
+                editRow.sheetType = objType;
+                editData.push(row);
+            }
+            if (row.ch != true && !isEmpty(row.id)) {
+                delIds += row.id + ",";
+            }
+        })
+        if (saveData.length > 0) {
+            if(!saveScoreRules(saveData)){
+              $.modal.msgWarning('保存失败');
+              return false;
+            }
+        }
+        if (editData.length > 0) {
+            if(!editScoreRules(editData)){
+              $.modal.msgWarning('编辑失败');
+              return false;
+            }
+        }
+        if (!isEmpty(delIds)) {
+            delIds = delIds.substring(0, delIds.length - 1);
+            if(!delScoreRules(delIds)){
+              $.modal.msgWarning('删除失败');
+              return false;
+            }
+        }
+        $.modal.msgSuccess("操作成功");
+        $.table.refresh();
+
+    }
+
+    function saveScoreRules(saveData) {
+      var flag = true;
+      $.ajax({
+            type: "post",
+            url: ctx + "userbackground/rules/batchSaveScoreRules",
+            data: {
+                scoreRulesListStr: JSON.stringify(saveData),
+            },
+            async: false,
+            success: function (result) {
+                if (result.code != 0) {
+                  flag = false;
+                }
+            }
+        })
+      return flag;
+    }
+
+    function editScoreRules(editData) {
+      var flag = true;
+      $.ajax({
+            type: "post",
+            url: ctx + "userbackground/rules/batchEditScoreRules",
+            data: {
+                scoreRulesListStr: JSON.stringify(editData),
+            },
+           async: false,
+            success: function (result) {
+                if (result.code != 0) {
+                  flag = false;
+                }
+            }
+        })
+      return flag;
+    }
+
+    function delScoreRules(delIds){
+      var flag = true;
+      $.ajax({
+            type: "post",
+            url: ctx + "userbackground/rules/remove",
+            data: {
+                ids: delIds,
+            },
+            async: false,
+            success: function (result) {
+                if (result.code != 0) {
+                  flag = false;
+                }
+            }
+        })
+        return flag;
+
+    }
+
+    //返回
+    function returnto() {
+        //回退到上一层
+        //window.history.back(-1);
+        rebackPage();
+    }
+
+</script>
+</body>
+</html>

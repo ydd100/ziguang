@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.userbackground.CpUnlimitCode.mapper.CpUnlimitCodeMapper">
+    
+    <resultMap type="CpUnlimitCode" id="CpUnlimitCodeResult">
+        <result property="id"    column="id"    />
+        <result property="scanningTimes"    column="scanning_times"    />
+        <result property="actityId"    column="actity_id"    />
+        <result property="qrCodePath"    column="qr_code_path"    />
+    </resultMap>
+
+    <sql id="selectCpUnlimitCodeVo">
+        select id, scanning_times, actity_id, qr_code_path from cp_unlimit_code
+    </sql>
+
+    <select id="selectCpUnlimitCodeList" parameterType="CpUnlimitCode" resultMap="CpUnlimitCodeResult">
+        <include refid="selectCpUnlimitCodeVo"/>
+        <where>  
+            <if test="scanningTimes != null "> and scanning_times = #{scanningTimes}</if>
+            <if test="actityId != null "> and actity_id = #{actityId}</if>
+            <if test="qrCodePath != null  and qrCodePath != ''"> and qr_code_path = #{qrCodePath}</if>
+        </where>
+    </select>
+    
+    <select id="selectCpUnlimitCodeById" parameterType="String" resultMap="CpUnlimitCodeResult">
+        <include refid="selectCpUnlimitCodeVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectCpUnlimitCodeByactityid" parameterType="String" resultMap="CpUnlimitCodeResult">
+        <include refid="selectCpUnlimitCodeVo"/>
+        where actity_id = #{actityId}
+    </select>
+        
+    <insert id="insertCpUnlimitCode" parameterType="CpUnlimitCode">
+        insert into cp_unlimit_code
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="scanningTimes != null">scanning_times,</if>
+            <if test="actityId != null">actity_id,</if>
+            <if test="qrCodePath != null">qr_code_path,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="scanningTimes != null">#{scanningTimes},</if>
+            <if test="actityId != null">#{actityId},</if>
+            <if test="qrCodePath != null">#{qrCodePath},</if>
+         </trim>
+    </insert>
+
+    <update id="updateCpUnlimitCode" parameterType="CpUnlimitCode">
+        update cp_unlimit_code
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="scanningTimes != null">scanning_times = #{scanningTimes},</if>
+            <if test="actityId != null">actity_id = #{actityId},</if>
+            <if test="qrCodePath != null">qr_code_path = #{qrCodePath},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteCpUnlimitCodeById" parameterType="String">
+        delete from cp_unlimit_code where id = #{id}
+    </delete>
+
+    <delete id="deleteCpUnlimitCodeByIds" parameterType="String">
+        delete from cp_unlimit_code where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

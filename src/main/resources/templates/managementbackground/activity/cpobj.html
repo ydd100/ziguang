@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('左右互选组件')" />
+    <th:block th:include="include :: bootstrap-duallistbox-css" />
+</head>
+<body class="white-bg">
+<div class="btn-group-sm"  role="group" style="margin:1%;">
+    <a class="btn btn-success" onclick="returnto()"> 返回</a>
+</div>
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <div class="row">
+        <div class="col-sm-12">
+            部门选择:
+            <select class="form-control" id="selectdept" onchange="selectdeptgetuser()">
+                <option>请选择部门</option>
+            </select>
+        </div>
+        <div class="col-sm-12" id="selectrank" style="display: none">
+            部门职级:
+            <div id="selectrankson"></div>
+        </div>
+        <div class="ibox-content" id="aaadiv" style="margin-top:5px;border-style:none;">
+            <select class="form-control dual_select" multiple id="aaa"></select>
+        </div>
+    </div>
+    <a class="btn btn-success" onclick="savesure()" > 确认</a>
+</div>
+<th:block th:include="include :: footer" />
+<th:block th:include="include :: bootstrap-duallistbox-js" />
+<script th:inline="javascript">
+    var sheetid = [[${sheetid}]];
+    var objType = [[${objType}]];//0:个人；1:单位／部门---sheet_type:0:个人测评对象；2:部门测评对象
+    var activityId = [[${activityId}]];
+    $(function(){
+        //获取部门
+        getdept();
+        //初始化--左右互选组件
+        initDualListbox();
+        //获取全部人员带职级
+        getAllUser();
+    })
+    //获取全部人员带职级
+    function getAllUser(){
+        $.ajax({
+            url:ctx + 'managementbackground/user/listAll',
+            type:'post',
+            data:{},
+            async:false,
+            success:function(data){
+                if(data == null){
+                    $.modal.alertWarning('查询有误,联系管理员');
+                    return false;
+                }
+                var rows = data.rows;
+                if(rows.length > 0){
+                    $('.dual_select').bootstrapDualListbox('destroy');
+                    //移除
+                    $("#aaadiv").html("");
+                    //追加
+                    $("#aaadiv").html("<select class='form-control dual_select' multiple id='aaa'></select>");
+                }
+                for(var i=0;i<rows.length;i++){
+                    //默认人员姓名8个字符串长度，不够补空格&nbsp;
+                    var userName = rows[i].name;
+                    var nameLen = rows[i].name.length;
+                    for (var j = 0;j<8-nameLen;j++) {
+                        userName += '　';
+                    }
+                    var sel  = document.getElementById("aaa");
+                    var opt = document.createElement("option");
+                    var opt = new Option(userName +'【'+rows[i].rankName+'】',rows[i].id);//第一个代表标签内的内容，第二个代表value
+                    sel.options.add(opt);
+                }
+                initDualListbox();
+            }
+        })
+    }
+    //初始化--左右互选组件
+    function initDualListbox(){
+    	//初始化
+        $('.dual_select').bootstrapDualListbox({
+            nonSelectedListLabel: '未选用户',
+            selectedListLabel: '已选用户',
+            preserveSelectionOnMove: 'moved',
+            moveOnSelect: false,           // 出现一个剪头，表示可以一次选择一个
+            filterTextClear: '展示所有',
+            moveSelectedLabel: "添加",
+            moveAllLabel: '添加所有',
+            removeSelectedLabel: "移除",
+            removeAllLabel: '移除所有',
+            infoText: '共{0}个',
+            showFilterInputs: false,       // 是否带搜索
+            selectorMinimalHeight: 320,
+            infoTextEmpty: '共0个'
+        });
+    }
+    //获取部门
+    function getdept(){
+        $.ajax({
+            url:ctx + 'managementbackground/dept/list',
+            type:'post',
+            data: {},
+            success:function(data){
+                for(var i=0;i<data.rows.length;i++){
+                    var sel = document.getElementById("selectdept");
+                    var opt = document.createElement("option");
+                    var opt = new Option(data.rows[i].name,data.rows[i].id);//第一个代表标签内的内容，第二个代表value
+                    sel.options.add(opt);
+                }
+            }
+        })
+    }
+    //选择部门
+    function selectdeptgetuser(){
+        var obj = document.getElementById("selectdept"); //定位id
+        var index = obj.selectedIndex; // 选中索引
+        var text = obj.options[index].text; // 选中文本
+        var value = obj.options[index].value; // 选中值
+        var objUserIdList = listObjUserId();
+        $.ajax({
+            url:ctx + 'managementbackground/user/listallbydeptid',
+            type:'post',
+            data:{
+                "deptid":value
+            },
+            async:false,
+            success:function(data){
+                if(data == null){
+                	$.modal.alertWarning('查询有误,联系管理员');
+                	return false;
+                }
+                var rows = data.rows;
+
+                $('.dual_select').bootstrapDualListbox('destroy');
+                //移除
+                $("#aaadiv").html("");
+                //追加
+                $("#aaadiv").html("<select class='form-control dual_select' multiple id='aaa'></select>");
+
+                if(rows.length > 0){
+                    for(var i=0;i<rows.length;i++){
+                        //默认人员姓名8个字符串长度，不够补空格&nbsp;
+                        var userName = rows[i].name;
+                        var nameLen = rows[i].name.length;
+                        for (var j = 0;j<8-nameLen;j++) {
+                            userName += '　';
+                        }
+                        var sel  = document.getElementById("aaa");
+                        var opt = document.createElement("option");
+                        if(objUserIdList.indexOf(rows[i].id)>-1) {
+                            var opt = new Option(userName +'【'+rows[i].rankName+'】',rows[i].id,true,true,);//第一个代表标签内的内容，第二个代表value,后面两个true分别表示默认被选中和有效
+                        }else{
+                            var opt = new Option(userName +'【'+rows[i].rankName+'】',rows[i].id);//第一个代表标签内的内容，第二个代表value
+                        }
+                        sel.options.add(opt);
+                    }
+                }
+                //初始化--左右互选组件
+                    initDualListbox();
+                //加载职级
+                var aaaradio= '<label><input type="radio" name="myradio" value="全部" onclick="clickradio()">全部</label>';
+                $.ajax({
+                    url:ctx + 'managementbackground/rank/list',
+                    type:'post',
+                    data:{
+                    },
+                    async:false,
+                    success:function(data){
+                        for(var i=0;i<data.rows.length;i++){
+                            aaaradio += '<label><input type="radio" name="myradio" value="'+data.rows[i].id+'" onclick="clickradio()">'+data.rows[i].name+'</label>';
+                        }
+                        $("#selectrankson").html(aaaradio);
+                        $("#selectrank").show();
+                    }
+                })
+            }
+        })
+    }
+    //点击职级
+    function clickradio(){
+        var deptid = $('#selectdept option:selected').val();//选中的值
+        var selectradioval = $("input[name='myradio']:checked").val();
+        var objUserIdList = listObjUserId();
+        $.ajax({
+            url:ctx + 'managementbackground/user/listallbydeptidandrankid',
+            type:'post',
+            data:{
+                "deptId":deptid,
+                "rankId":selectradioval
+            },
+            async:false,
+            success:function(data){
+                if(data == null){
+                    $.modal.alertWarning('查询有误,联系管理员');
+                    return false;
+                }
+                var rows = data.rows;
+                $('.dual_select').bootstrapDualListbox('destroy');
+                //移除
+                $("#aaadiv").html("");
+                //追加
+                $("#aaadiv").html("<select class='form-control dual_select' multiple id='aaa'></select>");
+                if(rows.length > 0){
+                    for(var i=0;i<rows.length;i++){
+                        //默认人员姓名8个字符串长度，不够补空格&nbsp;
+                        var userName = rows[i].name;
+                        var nameLen = rows[i].name.length;
+                        for (var j = 0;j<8-nameLen;j++) {
+                            userName += '　';
+                        }
+
+                        var sel  = document.getElementById("aaa");
+                        var opt = document.createElement("option");
+                        if(objUserIdList.indexOf(rows[i].id)>-1) {
+                            var opt = new Option(userName +'【'+rows[i].rankName+'】',rows[i].id,true,true,);//第一个代表标签内的内容，第二个代表value,后面两个true分别表示默认被选中和有效
+                        }else{
+                            var opt = new Option(userName +'【'+rows[i].rankName+'】',rows[i].id);//第一个代表标签内的内容，第二个代表value
+                        }
+                        sel.options.add(opt);
+                    }
+                }
+                //初始化--左右互选组件
+                initDualListbox();
+            }
+        })
+    }
+    //选择已经绑定的值
+    function listObjUserId(){
+    	var objUserIdList = [];
+    	var deptId = $("#selectdept").val();
+        //注意：这里易混
+        var sheetType = 0;//默认个人测评对象
+        if (objType == 1) {
+            sheetType = 2;//部门测评对象
+        }
+    	$.ajax({
+            url:ctx + 'userbackground/participant/selectObjUserByActIdSidStype',
+            type:'post',
+            data: {
+                "sheetId":sheetid,
+                "deptId":deptId,
+                "sheetType":sheetType,
+                "activityId":activityId,
+            },
+            async:false,
+            success:function(data){
+            	objUserIdList = data;
+            }
+        })
+        return objUserIdList;
+    }
+    //保存
+    function savesure(){
+        // var sheetid = cpActivity.id;
+        var useridobj = "";
+        if(objType == 0){
+            useridobj = $("#bootstrap-duallistbox-selected-list_ option").map(function(){return $(this).val();}).get().join(",")
+        }
+        var deptid = $('#selectdept option:selected').val();//选中的值
+        if(deptid == "请选择部门"){
+            $.modal.alertWarning("请先选择部门！！！")
+            return false;
+        }
+        if( useridobj == ""){
+            $.modal.alertWarning("已选用户不能为空")
+            return false;
+        }
+
+        // var aaaa = [[${objType}]];
+        $.ajax({
+            url:ctx + 'userbackground/participant/batchadd',
+            type:'post',
+            data: {
+                "sheetid":sheetid,
+                "useridobj":useridobj,
+                "deptid":deptid,
+                "aaaa":objType,
+                "activityId":activityId,
+            },
+            success:function(data){
+                if(data == "success"){
+                    $.modal.msgSuccess('保存成功');
+                }
+            }
+        })
+    }
+    //返回
+    function returnto(){
+        //回退到上一层
+        //window.history.back(-1);
+        rebackPage();
+    }
+</script>
+</body>
+</html>

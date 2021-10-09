@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('')" />
+    <th:block th:include="include :: bootstrap-duallistbox-css" />
+    <style>
+        .table>tbody>tr>td{
+            border:0px;
+        }
+        .table>thead>tr{
+            display: none;
+        }
+    </style>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="btn-group-sm"  role="group">
+        <!--<a class="btn btn-success" onclick=""> 下载</a>-->
+        <a class="btn btn-success" onclick="returnto()"> 返回</a>
+        <a class="btn btn-success" onclick="print()" style="margin-left: 90%"> 打印</a>
+    </div>
+    <h2 id="aaah2" style="margin-left: 40%"></h2>
+    <h4 id="aaah4"></h4>
+    <div id="print-div">
+    	<table id="bootstrap-table" style="border: 0px"></table>
+    </div>
+    
+    <!--<div id="ele"> </div>-->
+</div>
+<th:block th:include="include :: footer" />
+<th:block th:include="include :: bootstrap-duallistbox-js" />
+<script th:inline="javascript">
+    var id= [[${id}]];
+    var activityId = [[${activityId}]];
+    var codetype = [[${codetype}]];
+    //返回
+    function returnto(){
+        window.history.back(-1);
+    }
+    $(function(){
+        if(codetype == 1){
+            var options = {
+                url: ctx + "userbackground/CpDepartmentCode/selectcode?id="+id,
+                showSearch: false,
+                showRefresh: false,
+                showColumns: false,
+                showToggle: false,
+                pagination: false,
+                modalName: "部门制码",
+                columns: [{
+                    field: 'id',
+                    title: 'id',
+                    visible: false
+                },{
+                    field: '',
+                    title: '',
+                    formatter:function (value, row, index){
+                        var imgpath = "";
+                        $.ajax({
+                            url:ctx + 'managementbackground/activity/shibiecode',
+                            type:'post',
+                            async:false,
+                            data: {
+                                "imgpath":row.qrCodePath
+                            },
+                            success:function(data){
+                                imgpath = data;
+                            }
+                        })
+                        var aa = '<p style="margin-top: -15%">方式一(电脑打开请输入以下网址)</p><br>';
+                        if(imgpath == ""){
+                            var bb = '<p>未生成二维码</p>';
+                            return aa+bb;
+                        }else{
+                            var bb = '<p>'+imgpath+'</p>';
+                            return aa+bb;
+                        }
+                    }
+                },{
+                    field: 'qrCodePath',
+                    title: '',
+                    formatter: function(value, row, index) {
+                        if(row.qrCodePath == null){
+                            return '方式二（使用手机扫描二维码打开测评页面）<br><p>未生成二维码</p>';
+                        }else{
+                            $("#imgpath").val(row.qrCodePath);
+                            $("#aaah2").html(row.deptName+"部门");
+                            return '方式二（使用手机扫描二维码打开测评页面）<br>'+'<p><img style="margin-left:20%;" src="'+value+'"/></p>';
+                        }
+                    }
+                }],
+                queryParams:{
+                    "actityId":activityId
+                }
+            };
+            $.table.init(options);
+            /*$.ajax({
+                url:ctx + 'userbackground/CpDepartmentCode/selectcode',
+                type:'post',
+                async:false,
+                data: {
+                    "id":id
+                },
+                success:function(data){
+                    // console.log(data.rows[0].qrCodePath)
+                    var aaap = data.rows[0].qrCodePath;
+                    $.ajax({
+                        url:ctx + 'managementbackground/activity/shibiecode',
+                        type:'post',
+                        async:false,
+                        data: {
+                            "imgpath":data.rows[0].qrCodePath
+                        },
+                        success:function(data){
+                            var aaaimg = data;
+                            var aaadiv = '<div style="float:left;border: 1px"><p>方式一(电脑打开请输入以下网址)</p><br><p>'+aaaimg+'</p></div>' +
+                                         '<div style="float:left;border: 1px"><p>方式二（使用手机扫描二维码打开测评页面）</p><br><p><img src="'+aaap+'"/></p></div>';
+                            var divA = document.getElementById("ele");
+                            divA.innerHTML = divA.innerText+aaadiv;
+                        }
+                    })
+                }
+            })*/
+        }else if(codetype == 2){
+            var options = {
+                url: ctx + "userbackground/CpRankCodeSon/selectcode?id="+id,
+                showSearch: false,
+                showRefresh: false,
+                showColumns: false,
+                showToggle: false,
+                pagination: false,
+                modalName: "部门制码",
+                columns: [{
+                    field: 'id',
+                    title: 'id',
+                    visible: false
+                },{
+                    field: '',
+                    title: '',
+                    formatter:function (value, row, index){
+                        var imgpath = "";
+                        $.ajax({
+                            url:ctx + 'managementbackground/activity/shibiecode',
+                            type:'post',
+                            async:false,
+                            data: {
+                                "imgpath":row.qrCodePath
+                            },
+                            success:function(data){
+                                imgpath = data;
+                            }
+                        })
+                        var aa = '<p style="margin-top: -15%">方式一(电脑打开请输入以下网址)</p><br>';
+                        var bb = '<p>'+imgpath+'</p>';
+                        return aa+bb;                    }
+                },{
+                    field: 'qrCodePath',
+                    title: '',
+                    formatter: function(value, row, index) {
+                       $("#imgpath").val(row.qrCodePath);
+                        $.ajax({
+                            url:ctx + 'userbackground/CpRankCode/selectbyid',
+                            type:'post',
+                            data: {
+                                "id":row.rankCodeId
+                            },
+                            async:false,
+                            success:function(data){
+                                $("#aaah2").html(data.deptName);
+                                $("#aaah4").html(data.groupName);
+                            }
+                        })
+                        return '方式二（使用手机扫描二维码打开测评页面）<br>'+'<p><img style="margin-left:20%;" src="'+value+'"/></p>';
+                    }
+                }],
+                queryParams:{
+                    "actityId":activityId
+                }
+            };
+            $.table.init(options);
+        }else if(codetype == 3){
+            var options = {
+                url: ctx + "userbackground/CpOnePersonOneYard/list",
+                showSearch: false,
+                showRefresh: false,
+                showColumns: false,
+                showToggle: false,
+                pagination: false,
+                modalName: "部门制码",
+                columns: [{
+                    field: 'id',
+                    title: 'id',
+                    visible: false
+                },{
+                    field: '',
+                    title: '',
+                    formatter:function (value, row, index){
+                        var imgpath = "";
+                        $.ajax({
+                            url:ctx + 'managementbackground/activity/shibiecode',
+                            type:'post',
+                            async:false,
+                            data: {
+                                "imgpath":row.qrCodePath
+                            },
+                            success:function(data){
+                                imgpath = data;
+                            }
+                        })
+                        var aa = '<p style="margin-top: -15%">方式一(电脑打开请输入以下网址)</p><br>';
+                        var bb = '<p>'+imgpath+'</p>';
+                        return aa+bb;
+                    }
+                },{
+                    field: 'qrCodePath',
+                    title: '',
+                    formatter: function(value, row, index) {
+                        $("#aaah2").html("一人一码");
+                        $("#imgpath").val(row.qrCodePath);
+                        return '方式二（使用手机扫描二维码打开测评页面）<br>'+'<p><img style="margin-left:20%;" src="'+value+'"/></p>';
+                    }
+                }],
+                queryParams:{
+                    "actityId":activityId
+                }
+            };
+            $.table.init(options);
+        }
+    })
+    //获取网址
+    function geturlbycode(){
+        var imgpath = $("#imgpath").val();
+        $.ajax({
+            url:ctx + 'managementbackground/activity/shibiecode',
+            type:'post',
+            data: {
+                "imgpath":imgpath
+            },
+            success:function(data){
+                document.getElementById("aaap").innerHTML=data;
+                document.getElementById("aaa_a").style.display = "none";
+            }
+        })
+    }
+    //打印
+    function print(){
+        //$("#bootstrap-table").printArea();
+        
+    	//判断iframe是否存在，不存在则创建iframe
+        var iframe=document.getElementById("print-iframe");
+        if(!iframe){  
+                var el = document.getElementById("print-div");
+                iframe = document.createElement('IFRAME');
+                var doc = null;
+                iframe.setAttribute("id", "print-iframe");
+                iframe.setAttribute('style', 'position:absolute;width:0px;height:0px;left:-500px;top:-500px;');
+                document.body.appendChild(iframe);
+                doc = iframe.contentWindow.document;
+                //这里可以自定义样式
+                var cssStr = '.fixed-table-loading{ display: none;}';
+                doc.write('<style media="print">@page {size: auto;margin: 0mm;} '+cssStr+'</style>'); //解决出现页眉页脚和路径的问题
+                doc.write('<div>' + el.innerHTML + '</div>');
+                doc.close();
+                iframe.contentWindow.focus();            
+        }
+
+        setTimeout(function(){ iframe.contentWindow.print();},50)  //解决第一次样式不生效的问题
+        if (navigator.userAgent.indexOf("MSIE") > 0){
+            document.body.removeChild(iframe);
+        } 
+    }
+</script>
+</body>
+</html>

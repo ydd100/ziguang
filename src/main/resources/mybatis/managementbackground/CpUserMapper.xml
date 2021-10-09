@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.managementbackground.user.mapper.CpUserMapper">
+    
+    <resultMap type="CpUser" id="CpUserResult">
+        <result property="id"    column="id"    />
+        <result property="name"    column="name"    />
+        <result property="phone"    column="phone"    />
+        <result property="idcard"    column="idcard"    />
+        <result property="sex"    column="sex"    />
+        <result property="rankId"    column="rank_id"    />
+        <result property="unitName"    column="unit_name"    />
+        <result property="status"    column="status"    />
+        <result property="userType"    column="user_type"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="lastLoginTime"    column="last_login_time"    />
+        <result property="deptId"    column="dept_id"    />
+        <result property="rankName"    column="rank_name"    />
+    </resultMap>
+
+    <sql id="selectCpUserVo">
+        select id, name, phone, idcard, sex, rank_id, unit_name, status, user_type, create_time, last_login_time, dept_id from cp_user
+    </sql>
+
+    <select id="selectCpUserList" parameterType="CpUser" resultMap="CpUserResult">
+        <include refid="selectCpUserVo"/>
+        <where>  
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="phone != null  and phone != ''"> and phone = #{phone}</if>
+            <if test="idcard != null  and idcard != ''"> and idcard = #{idcard}</if>
+            <if test="sex != null  and sex != ''"> and sex = #{sex}</if>
+            <if test="rankId != null  and rankId != ''"> and rank_id = #{rankId}</if>
+            <if test="unitName != null  and unitName != ''"> and unit_name like concat('%', #{unitName}, '%')</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+            <if test="userType != null  and userType != ''"> and user_type = #{userType}</if>
+            <if test="lastLoginTime != null "> and last_login_time = #{lastLoginTime}</if>
+            <if test="deptId != null  and deptId != ''"> and dept_id = #{deptId}</if>
+        </where>
+    </select>
+
+    <select id="selectCpUserListAll" parameterType="CpUser" resultMap="CpUserResult">
+        SELECT
+            cpu.id,
+            cpu.name,
+            cpu.phone,
+            cpu.idcard,
+            cpu.sex,
+            cpu.rank_id,
+            cpu.unit_name,
+            cpu.STATUS,
+            cpu.user_type,
+            cpu.create_time,
+            cpu.last_login_time,
+            cpu.dept_id,
+            cpr.name as rank_name
+        FROM
+            cp_user cpu
+                LEFT JOIN cp_rank cpr ON cpr.id = cpu.rank_id
+    </select>
+    
+    <select id="selectCpUserById" parameterType="String" resultMap="CpUserResult">
+        <include refid="selectCpUserVo"/>
+        where id = #{id}
+    </select>
+
+
+
+    <select id="selectCpUserAllBydeptid" parameterType="String" resultMap="CpUserResult">
+        SELECT
+            cpu.id,
+            cpu.name,
+            cpu.phone,
+            cpu.idcard,
+            cpu.sex,
+            cpu.rank_id,
+            cpu.unit_name,
+            cpu.STATUS,
+            cpu.user_type,
+            cpu.create_time,
+            cpu.last_login_time,
+            cpu.dept_id,
+            cpr.name as rank_name
+        FROM
+            cp_user cpu
+                LEFT JOIN cp_rank cpr ON cpr.id = cpu.rank_id
+        where cpu.dept_id = #{deptId}
+    </select>
+
+    <select id="listallbydeptidandrankid" parameterType="CpUser" resultMap="CpUserResult">
+        SELECT
+            cpu.id,
+            cpu.name,
+            cpu.phone,
+            cpu.idcard,
+            cpu.sex,
+            cpu.rank_id,
+            cpu.unit_name,
+            cpu.STATUS,
+            cpu.user_type,
+            cpu.create_time,
+            cpu.last_login_time,
+            cpu.dept_id,
+            cpr.name as rank_name
+        FROM
+            cp_user cpu
+                LEFT JOIN cp_rank cpr ON cpr.id = cpu.rank_id
+        <where>
+            cpu.dept_id = #{deptId}
+            <if test="rankId != null  and rankId != '全部'"> and rank_id = #{rankId}</if>
+        </where>
+    </select>
+
+    <select id="selectCpUserBydeptid" parameterType="String" resultMap="CpUserResult">
+        <include refid="selectCpUserVo"/>
+        where dept_id = #{deptId}
+    </select>
+        
+    <insert id="insertCpUser" parameterType="CpUser" useGeneratedKeys="true" keyProperty="id">
+        insert into cp_user
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="name != null">name,</if>
+            <if test="phone != null">phone,</if>
+            <if test="idcard != null">idcard,</if>
+            <if test="sex != null">sex,</if>
+            <if test="rankId != null">rank_id,</if>
+            <if test="unitName != null">unit_name,</if>
+            <if test="status != null">status,</if>
+            <if test="userType != null">user_type,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="lastLoginTime != null">last_login_time,</if>
+            <if test="deptId != null">dept_id,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="name != null">#{name},</if>
+            <if test="phone != null">#{phone},</if>
+            <if test="idcard != null">#{idcard},</if>
+            <if test="sex != null">#{sex},</if>
+            <if test="rankId != null">#{rankId},</if>
+            <if test="unitName != null">#{unitName},</if>
+            <if test="status != null">#{status},</if>
+            <if test="userType != null">#{userType},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="lastLoginTime != null">#{lastLoginTime},</if>
+            <if test="deptId != null">#{deptId},</if>
+         </trim>
+    </insert>
+
+    <update id="updateCpUser" parameterType="CpUser">
+        update cp_user
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null">name = #{name},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="idcard != null">idcard = #{idcard},</if>
+            <if test="sex != null">sex = #{sex},</if>
+            <if test="rankId != null">rank_id = #{rankId},</if>
+            <if test="unitName != null">unit_name = #{unitName},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="userType != null">user_type = #{userType},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="lastLoginTime != null">last_login_time = #{lastLoginTime},</if>
+            <if test="deptId != null">dept_id = #{deptId},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteCpUserById" parameterType="String">
+        delete from cp_user where id = #{id}
+    </delete>
+
+    <delete id="deleteCpUserByIds" parameterType="String">
+        delete from cp_user where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

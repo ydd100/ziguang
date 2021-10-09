@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.userbackground.sheet.mapper.CpSheetMapper">
+    
+    <resultMap type="CpSheet" id="CpSheetResult">
+        <result property="id"    column="id"    />
+        <result property="name"    column="name"    />
+        <result property="tableExplain"    column="table_explain"    />
+        <result property="objType"    column="obj_type"    />
+        <result property="evaType"    column="eva_type"    />
+        <result property="coverPath"    column="cover_path"    />
+        <result property="backPath"    column="back_path"    />
+        <result property="subjectPath"    column="subject_path"    />
+        <result property="operateId"    column="operate_id"    />
+        <result property="operateName"    column="operate_name"    />
+        <result property="createTime"    column="create_time"    />
+    </resultMap>
+
+    <sql id="selectCpSheetVo">
+        select id, name, table_explain, obj_type, eva_type, cover_path, back_path, subject_path, operate_id, create_time from cp_sheet
+    </sql>
+	
+	<!-- 关联用户表查询 -->
+    <sql id="selectCpSheetUser">
+        select s.id, s.name, s.operate_id,s.obj_type, u.user_name as operate_name, s.create_time
+        from cp_sheet s 
+        left join sys_user u 
+        on s.operate_id = u.user_id
+    </sql>
+
+    <select id="selectCpSheetList" parameterType="CpSheet" resultMap="CpSheetResult">
+        <include refid="selectCpSheetUser"/>
+        <where>  
+            <if test="name != null  and name != ''"> and s.name like CONCAT('%', #{name}, '%')</if>
+            <if test="tableExplain != null  and tableExplain != ''"> and s.table_explain = #{tableExplain}</if>
+            <if test="objType != null  and objType != ''"> and s.obj_type = #{objType}</if>
+            <if test="evaType != null  and evaType != ''"> and s.eva_type = #{evaType}</if>
+            <if test="coverPath != null  and coverPath != ''"> and s.cover_path = #{coverPath}</if>
+            <if test="backPath != null  and backPath != ''"> and s.back_path = #{backPath}</if>
+            <if test="subjectPath != null  and subjectPath != ''"> and s.subject_path = #{subjectPath}</if>
+            <if test="operateId != null "> and s.operate_id = #{operateId}</if>
+        </where>
+        order by create_time desc
+    </select>
+    
+    <select id="selectCpSheetById" parameterType="Long" resultMap="CpSheetResult">
+        <include refid="selectCpSheetVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertCpSheet" parameterType="CpSheet" useGeneratedKeys="true" keyProperty="id">
+        insert into cp_sheet
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null">name,</if>
+            <if test="tableExplain != null">table_explain,</if>
+            <if test="objType != null">obj_type,</if>
+            <if test="evaType != null">eva_type,</if>
+            <if test="coverPath != null">cover_path,</if>
+            <if test="backPath != null">back_path,</if>
+            <if test="subjectPath != null">subject_path,</if>
+            <if test="operateId != null">operate_id,</if>
+            <if test="createTime != null">create_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null">#{name},</if>
+            <if test="tableExplain != null">#{tableExplain},</if>
+            <if test="objType != null">#{objType},</if>
+            <if test="evaType != null">#{evaType},</if>
+            <if test="coverPath != null">#{coverPath},</if>
+            <if test="backPath != null">#{backPath},</if>
+            <if test="subjectPath != null">#{subjectPath},</if>
+            <if test="operateId != null">#{operateId},</if>
+            <if test="createTime != null">#{createTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateCpSheet" parameterType="CpSheet">
+        update cp_sheet
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null">name = #{name},</if>
+            <if test="tableExplain != null">table_explain = #{tableExplain},</if>
+            <if test="objType != null">obj_type = #{objType},</if>
+            <if test="evaType != null">eva_type = #{evaType},</if>
+            <if test="coverPath != null">cover_path = #{coverPath},</if>
+            <if test="backPath != null">back_path = #{backPath},</if>
+            <if test="subjectPath != null">subject_path = #{subjectPath},</if>
+            <if test="operateId != null">operate_id = #{operateId},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteCpSheetById" parameterType="Long">
+        delete from cp_sheet where id = #{id}
+    </delete>
+
+    <delete id="deleteCpSheetByIds" parameterType="String">
+        delete from cp_sheet where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+    <!-- 根据活动activityId查询测评表格sheet -->
+    <select id="selectSheetListByActivityId" parameterType="Long" resultType="Map">
+    	SELECT er.activity_id activityId,s.id id,s.name name,s.obj_type objType 
+    	FROM cp_evaluate_result er left join cp_sheet s on er.sheet_id = s.id 
+    	where er.activity_id = #{activityId}
+    	order by s.id
+    </select>
+
+    <select id="selectSheetListByActivityId1" resultType="Map">
+        SELECT er.activity_id activityId,s.id id,s.name name,s.obj_type objType
+        FROM cp_evaluate_result er left join cp_sheet s on er.sheet_id = s.id
+        where er.activity_id = #{activityId} and er.sheet_id not in
+        <foreach collection="sIds" item="item" index="index" open="("
+                 separator="," close=")">
+            #{item}
+        </foreach>
+        order by s.id
+    </select>
+
+</mapper>

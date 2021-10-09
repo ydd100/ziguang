@@ -1,0 +1,58 @@
+ body { 
+	 background: #538CF3 url(../img/loginbanner3.png);
+	 height: 100%;
+	 overflow: hidden;
+ }
+
+.loginWrapper {
+	position: relative;
+	z-index: 1000;
+	width: 720px;
+	height: 360px;
+	background-color: #fff;
+	border-radius: 8px;
+	margin-top:10%;
+	margin-left:calc(50% - 360px);
+	margin-right:calc(50% - 360px);
+	box-shadow: 0 0 20px #1A5DB4;
+	overflow: hidden;
+}
+
+.banWrapper {
+	width: 50%;
+	height: 100%;
+	float: left;
+	background-color: #1C55A0;
+}
+.banContent {
+	text-align: center;
+}
+.banContent img {
+	width: 70%;
+	margin:50px auto;
+	
+}
+.loginMain {
+	width: 50%;
+	float: right;
+	padding:30px;
+	box-sizing: border-box; 
+}
+.loginLogoDiv {
+	margin-bottom: 2em;
+}
+.login-title {
+	margin-bottom: 20px;
+}
+input.loginText {
+	width:90%;
+	height: 50px;
+	margin-bottom: 10px;
+	text-indent: 4px;
+	border-radius: 2px;
+}
+.loginBtn {
+	width:90%;
+	height: 36px;
+	margin-top:10px;
+}

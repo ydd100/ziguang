@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('修改测评活动')" />
+    <th:block th:include="include :: datetimepicker-css" />
+</head>
+<body class="white-bg">
+<div class="btn-group-sm"  role="group">
+    <a class="btn btn-success" onclick="returnto()" style="margin: 1%"> 返回</a>
+</div>
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <form class="form-horizontal m" id="form-activity-edit" th:object="${cpActivity}">
+        <input name="id" th:field="*{id}" type="hidden">
+        <div class="form-group">
+            <label class="col-sm-3 control-label">名称：</label>
+            <div class="col-sm-8">
+                <input name="actName" th:field="*{actName}" class="form-control" type="text">
+            </div>
+        </div>
+        <!--<div class="form-group">
+            <label class="col-sm-3 control-label">模板编号：</label>
+            <div class="col-sm-8">
+                <input name="templateId" th:field="*{templateId}" class="form-control" type="text">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">发布人：</label>
+            <div class="col-sm-8">
+                <input name="releaseId" th:field="*{releaseId}" class="form-control" type="text">
+            </div>
+        </div>-->
+        <div class="form-group">
+            <label class="col-sm-3 control-label">发布人：</label>
+            <div class="col-sm-8">
+                <input name="releaseName" th:field="*{releaseName}" class="form-control" type="text">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">发布单位：</label>
+            <div class="col-sm-8">
+                <input name="releaseUnit" th:field="*{releaseUnit}" class="form-control" type="text">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">活动开始时间：</label>
+            <div class="col-sm-8">
+                <div class="input-group date">
+                    <input name="activityBeginTime" th:value="${#dates.format(cpActivity.activityBeginTime, 'yyyy-MM-dd')}" class="form-control" placeholder="yyyy-MM-dd" type="text">
+                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">活动结束：</label>
+            <div class="col-sm-8">
+                <div class="input-group date">
+                    <input name="activityEndTime" th:value="${#dates.format(cpActivity.activityEndTime, 'yyyy-MM-dd')}" class="form-control" placeholder="yyyy-MM-dd" type="text">
+                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">状态：</label>
+            <div class="col-sm-8">
+                <select name="status" class="form-control m-b" th:with="type=${@dict.getType('actity_state')}">
+                    <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}" th:field="*{status}"></option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">活动说明：</label>
+            <div class="col-sm-8">
+                <input name="activityIllustrate" th:field="*{activityIllustrate}" class="form-control" type="text">
+            </div>
+        </div>
+    </form>
+</div>
+<th:block th:include="include :: footer" />
+<th:block th:include="include :: datetimepicker-js" />
+<script th:inline="javascript">
+    var prefix = ctx + "managementbackground/activity";
+    $("#form-activity-edit").validate({
+        focusCleanup: true
+    });
+
+    function submitHandler() {
+        if ($.validate.form()) {
+            $.operate.save(prefix + "/edit", $('#form-activity-edit').serialize());
+        }
+    }
+
+    $("input[name='activityBeginTime']").datetimepicker({
+        format: "yyyy-mm-dd",
+        minView: "month",
+        autoclose: true
+    });
+
+    $("input[name='activityEndTime']").datetimepicker({
+        format: "yyyy-mm-dd",
+        minView: "month",
+        autoclose: true
+    });
+
+    //返回
+    function returnto(){
+        location.href =  ctx + "managementbackground/activity";
+    }
+</script>
+</body>
+</html>

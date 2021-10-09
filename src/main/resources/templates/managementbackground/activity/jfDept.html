@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+  <th:block th:include="include :: header('左右互选组件')" />
+  <th:block th:include="include :: bootstrap-duallistbox-css" />
+  <style>
+    .fixed-table-toolbar {
+      display : none;
+    }
+    li {
+      list-style-type:none;
+    }
+  </style>
+</head>
+<body class="white-bg">
+<div class="btn-group-sm"  role="group" style="margin:1%;">
+  <a class="btn btn-success" onclick="returnto()"> 返回</a>
+  <a class="btn btn-success" onclick="savesure()"> 确认</a>
+</div>
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+  <div class="row">
+    <form id="form-jf-dept">
+      <div>
+        <div style="height: 100%;float:left;width: 25%;margin-right: 1%;border: 1px solid #e5e3e3">
+          <div class="ibox-content">
+            部门选择:
+            <select class="form-control" id="selectdept" onchange="clearJfInfo()">
+              <option>--请选择部门--</option>
+            </select>
+          </div>
+          <div class="ibox-content" id="aaa"></div>
+          <div class="col-sm-12">
+            <label>职级分组：</label>
+            <input name="rankName" id="rankName" class="form-control" type="text" placeholder="请输入职级分组">
+          </div>
+          <div class="col-sm-12" style="margin-top:10px;">
+            <label>分值占比：</label>
+            <input name="points" id="points" class="form-control" type="text" placeholder="请输入分值占比">
+          </div>
+        </div>
+        <div style="float:left;width: 70%;">
+          <div class="col-sm-12 table-striped">
+            <table id="bootstrap-table"></table>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<th:block th:include="include :: footer" />
+<th:block th:include="include :: bootstrap-duallistbox-js" />
+<script th:inline="javascript">
+  var sheetid = [[${sheetid}]];
+  var objType = [[${objType}]];
+  var activityId = [[${activityId}]];
+
+  //验证选项信息
+  $("#form-jf-dept").validate({
+    focusCleanup: true,
+    rules:{
+      rankName:{
+        required:true,
+      },
+    },
+    messages:{
+      rankName:{
+        required:'必填',
+      },
+    },
+  });
+
+  $(function(){
+    //获取部门
+    getdept();
+    //获取职级
+    getrank();
+
+    initTable();//初始化表格
+
+  })
+
+  //初始化表格
+  function initTable(){
+    var options = {
+      url: ctx + "userbackground/rules/selectJfRulesList",
+      showSearch: false,
+      showRefresh: false,
+      showColumns: false,
+      showToggle: false,
+      modalName: "参与者",
+      columns: [
+        {
+          field: 'deptId',
+          title: '',
+          visible: false
+        },
+        {
+          field: 'deptName',
+          title: '部门名称',
+          formatter:function(value,row,index){
+            var rows = $("#bootstrap-table").bootstrapTable('getData');
+
+            if(index>0) {
+              if(rows[index-1].deptName == value){
+                value = '';
+              }
+            }
+
+            return value;
+          }
+        },
+        {
+          field: 'groupName',
+          title: '职级分组',
+        },
+        {
+          field: 'allRank',
+          title: '包含职级',
+        },
+        {
+          field: 'fraction',
+          title: '分值占比',
+          formatter: function(value){
+            if(!isEmpty(value)){
+              return value + '%';
+            }
+          }
+        },
+        {
+          title: '操作',
+          formatter: function(value, row, index) {
+            var actions = [];
+            actions.push('<a class="btn btn-success btn-xs " href="javascript:void(0)" onclick="editJfRules(\'' + row.deptId + '\',\''+row.rankIds+'\',\''+row.groupName+'\',\''+row.fraction+'\')"><i class="fa fa-edit"></i> 编辑</a> ');
+            actions.push('<a class="btn btn-danger btn-xs " href="javascript:void(0)" onclick="delJfRules(\'' + row.deptId + '\',\''+row.activityId+'\',\''+row.sheetId+'\',\''+row.sheetType+'\',\''+row.groupName+'\')"><i class="fa fa-remove"></i> 删除</a>');
+            return actions.join('');
+          }
+        }],
+      queryParams:function(){
+        var sheetId = sheetid;
+        var param ={
+          sheetId:sheetId,
+          sheetType:objType,
+          activityId:activityId,
+        }
+        return param;
+      }
+    };
+    $.table.init(options);
+  }
+
+  function getdept(){
+    $.ajax({
+      url:ctx + 'managementbackground/dept/list',
+      type:'post',
+      data: {},
+      success:function(data){
+        for(var i=0;i<data.rows.length;i++){
+          var sel = document.getElementById("selectdept");
+          var opt = document.createElement("option");
+          var opt = new Option(data.rows[i].name,data.rows[i].id);//第一个代表标签内的内容，第二个代表value
+          sel.options.add(opt);
+        }
+      }
+    })
+  }
+  function getrank(){
+    $.ajax({
+      url:ctx + 'managementbackground/rank/list',
+      type:'post',
+      data: {},
+      success:function(data){
+        debugger
+        //给id为aaa的div添加复选框了
+        var ulStr = '<ul  style=""></ul>';
+        for(var i =0;i<data.rows.length;i++){
+          // var oCheckbox=document.createElement("input");
+          // var myText=document.createTextNode(data.rows[i].name);
+          // oCheckbox.setAttribute("type","checkbox");
+          // oCheckbox.setAttribute("id",data.rows[i].id);
+          // oCheckbox.setAttribute("name","mycheckbox");
+          // oCheckbox.setAttribute("value",data.rows[i].name);
+          // var mydiv=document.getElementById("aaa");
+          // mydiv.appendChild(oCheckbox);
+          // mydiv.appendChild(myText);
+
+          var row = data.rows[i];
+          ulStr += '<li><input type="checkbox" id="'+row.id+'" name="mycheckbox" value="'+row.name+'"/>'+row.name+'</li>';
+        }
+        ulStr += '</ul>';
+        $("#aaa").html(ulStr);
+      }
+    })
+  }
+  //保存
+  function savesure(){
+    // var sheetid = cpActivity.id;
+    //获取职级id和名字
+    if (!$("#form-jf-dept").valid()){
+      return false;
+    }
+    var str=document.getElementsByName("mycheckbox");
+    var objarray = str.length;
+    var chestr = "";
+    // var rankNames = "";
+    for (i=0;i<objarray;i++) {
+      if(str[i].checked == true)
+      {
+        chestr += str[i].id + ",";
+        // rankNames += str[i].value + ",";
+      }
+    }
+    var rankids = chestr;
+    var deptid = $('#selectdept option:selected') .val();//选中的值
+    var rankName = $("#rankName").val();
+    var points = $("#points").val();
+
+    // var aaaa = [[${objType}]];
+    $.ajax({
+      url:ctx + 'userbackground/rules/batchaddjf',
+      type:'post',
+      data: {
+        "sheetid":sheetid,
+        "deptid":deptid,
+        "rankids":rankids,
+        "rankName":rankName,
+        "points":points,
+        "aaaa":objType,
+        "activityId":activityId,
+      },
+      success:function(data){
+        if(data == "success"){
+          $.modal.msgSuccess('保存成功');
+        }
+        //需要查询
+        $.table.search();
+      }
+    })
+  }
+  //返回
+  function returnto(){
+    //回退到上一层
+    //window.history.back(-1);
+    rebackPage();
+  }
+
+  //参与者列表编辑
+  function editJfRules(deptId,rankIds,groupName,fraction){
+    //clearJfInfo();//先清除上次数据显示
+    $("#points").val('');
+    $("input[name='mycheckbox']:checkbox").each(function(){
+      $(this).prop("checked", false);
+    })
+
+    var rankIdArr = rankIds.split(',');
+    $("#selectdept").val(deptId);
+    $("#rankName").val(groupName);
+    $("#points").val(fraction);
+
+    //选中checkbox职级
+    $.each(rankIdArr,function(index,rankId){
+      $('#'+rankId).prop("checked", true);
+    })
+  }
+
+  //参与者列表删除
+  function delJfRules(deptId,actId,sId,sheetType,groupName){
+    $.modal.confirm("确认要删除吗？", function() {
+      var data = { "activityId": actId,"sheetId": sId,"sheetType": sheetType,"deptId": deptId,"groupName":groupName };
+      $.operate.submit(ctx + "userbackground/rules/delSheetScoreRulesByMore", "post", "json", data);
+      $("#selectdept").val(deptId);
+      $("#rankName").val('');
+      $("#points").val('');
+      $("input[name='mycheckbox']:checkbox").each(function(){
+        $(this).prop("checked", false);
+      })
+    })
+  }
+
+  //清除职级选中状态
+  function clearJfInfo(){
+    debugger
+    $("#rankName").val('');
+    $("#points").val('');
+    $("input[name='mycheckbox']:checkbox").each(function(){
+      $(this).prop("checked", false);
+    })
+
+    var deptid = $('#selectdept option:selected') .val();//选中的值
+    //查出绑定并且选中
+    $.ajax({
+      url:ctx + 'userbackground/rules/selectrankbydeptidandactid',
+      type:'post',
+      data: {
+        "deptId":deptid,
+        "activityId":activityId,
+        "sheetId":sheetid
+      },
+      success:function(data){
+        for(var i=0;i<data.length;i++){
+          console.log(data[i].rankId)
+          if(data[i].rankId != ""){
+            $('#'+data[i].rankId).prop("checked", true);
+          }
+        }
+      }
+    })
+  }
+</script>
+</body>
+</html>

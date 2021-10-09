@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <!-- <th:block th:include="include :: header('测评表格列表')" /> -->
+    
+    <link th:href="@{/css/wnui.css}" rel="stylesheet"/>
+	<link th:href="@{/css/web.css}" rel="stylesheet"/>
+	<link th:href="@{/css/userbackground/btn-imp.css}" rel="stylesheet"/>
+    <title>在线测评</title>
+    <style type="text/css">
+    	/*body {
+				background: #F3F5F8 url() no-repeat center top;
+				background-attachment:fixed;
+				background-size:100%;
+			}*/
+		h3 {
+			margin-top:20px;
+		}
+		p {
+			font-size:14px;
+		}
+    </style>
+    
+</head>
+<body th:style="'background-image: url('+@{${cpSheet.backPath}}+')'" style="background-attachment:fixed;background-size:100%;">
+     <div class="wap-wrap" style="height: 100vh; box-shadow: 0 0 8px #999; padding:0;">
+		<form class="form-horizontal m" id="form-evaluation-edit" th:object="${cpSheet}">
+			<div class="banner">
+				<!--<img th:src="@{/}+${cpSheet.coverPath}" alt="">-->
+				<img th:src="@{${cpSheet.coverPath}}" alt="">
+				<input id="aaaimg" th:field="${cpSheet.backPath}" class="form-control" type="text" style="display: none">
+			</div>
+			<div class="head pd10">
+				<h1 th:text="${cpSheet.name}"></h1>				 
+			</div>  
+			<div class="ind-main">
+				<h3>填表说明：</h3>
+				<p class="" th:text="${cpSheet.tableExplain}">
+				</p>
+			</div>
+		</form>
+		<div class="wap-foot tc">		 
+			<button id="subjectPath" class="btn btn-lg" onclick="startCp()">开始测评</button> 
+		</div>
+	</div>
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+	    var cpSheet = [[${cpSheet}]];
+	    var sheetId = cpSheet.id;
+	    $("#subjectPath").addClass(cpSheet.subjectPath);
+		/*$('body').css({
+			'background': '#F3F5F8 url('+ctx + cpSheet.backPath+') no-repeat center top',
+			'background-attachment':'fixed',
+			'background-size':'100%',
+		})*/
+		
+		function startCp() {
+			window.location = ctx + "userbackground/previewpage/toStartCp?sheetId="+sheetId;
+		}
+    </script>
+</body>
+</html>

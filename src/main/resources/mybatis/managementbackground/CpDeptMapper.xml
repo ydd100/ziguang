@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.managementbackground.dept.mapper.CpDeptMapper">
+    
+    <resultMap type="CpDept" id="CpDeptResult">
+        <result property="id"    column="id"    />
+        <result property="name"    column="name"    />
+        <result property="creatTime"    column="creat_time"    />
+    </resultMap>
+
+    <sql id="selectCpDeptVo">
+        select id, name, creat_time from cp_dept
+    </sql>
+
+    <select id="selectCpDeptList" parameterType="CpDept" resultMap="CpDeptResult">
+        <include refid="selectCpDeptVo"/>
+        <where>  
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="creatTime != null "> and creat_time = #{creatTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectCpDeptById" parameterType="String" resultMap="CpDeptResult">
+        <include refid="selectCpDeptVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertCpDept" parameterType="CpDept">
+        insert into cp_dept
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null">name,</if>
+            <if test="creatTime != null">creat_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null">#{name},</if>
+            <if test="creatTime != null">#{creatTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateCpDept" parameterType="CpDept">
+        update cp_dept
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null">name = #{name},</if>
+            <if test="creatTime != null">creat_time = #{creatTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteCpDeptById" parameterType="String">
+        delete from cp_dept where id = #{id}
+    </delete>
+
+    <delete id="deleteCpDeptByIds" parameterType="String">
+        delete from cp_dept where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!-- 根据部门名称只能查出一条数据 -->
+    <select id="checkOneByDeptName" parameterType="CpDept" resultMap="CpDeptResult">
+        <include refid="selectCpDeptVo"/>
+        where name = #{name}
+        <if test="id != null and id !=''">
+            and id !=#{id}
+        </if>
+    </select>
+
+</mapper>

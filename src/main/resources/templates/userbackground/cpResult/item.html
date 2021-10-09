@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+	<head>
+		<meta charset="utf-8">
+		<title>在线测评</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+		<link th:href="@{/css/wnui.css}" rel="stylesheet"/>
+		<link th:href="@{/css/web.css}" rel="stylesheet"/>
+		<link th:href="@{/css/userbackground/btn-imp.css}" rel="stylesheet"/>
+		<style type="text/css">
+			.win1 { 
+				position: fixed;
+				background-color: #fff;
+				border-radius: 4px;
+				box-shadow: 0 0 8px #ccc;
+				width: 25em; 
+				height: 18em;
+				margin:0 auto;
+				display: inline-block; 
+				padding:20px;
+				text-align: left;
+				left:calc(50% - 12.5em);
+				top:20vh;
+				line-height: 2em; 
+			}
+			.item-hd {
+				background-color: #f5f5f5;
+				padding: 3px;
+				text-align: center;
+				margin-top: 10px;
+			}
+		</style>
+	</head>
+	<body th:style="'background-image: url('+@{${cpSheet.backPath}}+')'" style="background-attachment:fixed;background-size:100%;">
+	<div class="wrap wap-wrap" style=" background-color: #fff;">
+			<div class="top">
+				<div class="backbox fl"><a href="javascript:void(0)" onclick="rebackPrev()"><i class="iconfont">&#xe60b;</i> 返回</a></div>
+				<div class="fc mtitle">
+					<p th:text="${cpSheet.name}"></p>
+				</div>
+			</div>
+
+			<div class="ind-main">
+				<p>填表说明：</p>
+				<p class="" th:text="${cpSheet.tableExplain}"></p>
+			</div>
+			<div style=" margin-left: 35%;margin-bottom: -5%;font-size: 20px;" id="testObj"></div>
+
+			<!-- js动态显示详细信息 -->
+			<div class="col-data-info"></div>
+
+			<div class="k20"></div>
+			<div class="btn-wrap tc pd20">
+				<a href="javascript:void(0)" id="subjectPath" class="btn btn-lg wb60" onclick="submitResult()"> 提交 </a>
+			</div>
+		</div>
+		<th:block th:include="include :: footer" />
+		<script th:inline="javascript">
+			var testObjMap = [[${testObjMap}]];
+			var allParam = [[${allParam}]];
+			var allParam1 = [[${allParam}]];
+			var cpSheet = [[${cpSheet}]];
+			var sheetId = cpSheet.id;
+			$("#subjectPath").addClass(cpSheet.subjectPath);
+			/*$('body').css({
+				'background': '#F3F5F8 url('+ctx+cpSheet.backPath+') no-repeat center top',
+				'background-attachment':'fixed',
+				'background-size':'100%',
+			})*/
+
+			var objType = allParam.objtype;//对象类型（0:个人；1:单位／部门）
+
+			//测评的所有数据和值
+			var allCpData = [];
+
+			$(function(){
+				//默认第一个测评对象
+				selectFirstTestObj();
+
+				//根据测评对象数量，动态提示按钮文本
+				getTestObjLenAndBtn();
+
+				//初始化选项行
+				findColumnDataInfo();
+			})
+
+			//根据测评对象数量，动态提示按钮文本
+			function getTestObjLenAndBtn(){
+				var flag = true;
+				var testObjLen = Object.keys(testObjMap).length;//测评对象个数
+				//根据测评对象数量，动态提示按钮文本
+				if(testObjLen>1){
+					$("#subjectPath").text('下一步');
+				}else if (testObjLen == 0) {
+					flag = false;
+				}
+				return flag;
+			}
+
+
+			//显示测评对象--就显示一个
+			function selectFirstTestObj(){
+				for ( var key in testObjMap) {
+					$("#testObj").attr('obj-id',key).text('测评对象：'+testObjMap[key]);
+					break;
+				}
+			}
+
+			//返回－－－－需要改，目前返回不到上一个测评对象，需要计算
+			function rebackPrev(){
+				window.history.back();
+			}
+
+
+			//下一步／提交
+			function submitResult(){
+				var objId = $("#testObj").attr('obj-id');
+
+				//先拼接数据---如果有没选的，就不进行下一步了
+				if(!pjCpData()){
+					$.modal.msgWarning('有未填写的数据，请检查！');
+					return false;
+				}
+
+				delete testObjMap[objId];
+
+				//如果返回false，所有对象测评完成，保存数据
+				if(!getTestObjLenAndBtn()){
+					saveAllCpData();
+				} else {
+					selectFirstTestObj();//显示下一个
+					//清空所有选项radio
+					$("input:radio").each(function(){
+						$(this).prop("checked", false);
+					})
+
+					$('body,html').animate({
+
+						scrollTop: '0em'
+
+					}, 1000);
+				}
+			}
+
+			//先拼接所有测评数据
+			function pjCpData() {
+				var flag = true;
+				var activityId = allParam.activityid;
+				var rankId = allParam.pageSelectRankId;
+				if(allParam.codeType == 'rank') {
+					rankId = allParam.rankid;
+				}
+				var objDeptId = '';
+				var objUserId = '';
+				//对象类型（0:个人；1:单位／部门）
+				if(objType == 0) {
+					objUserId = $("#testObj").attr('obj-id');
+				}else {
+					objDeptId = $("#testObj").attr('obj-id');
+				}
+				//遍历pf-item的div，获取项id，名称，选中值拼接数据
+				$('.pf-item').each(function(index){
+					var cpData = {};
+					var colId = $(this).attr('id');
+					var colTitle = $(this).attr('name');
+					var colValue = 0;
+
+					//获取选中的值，如果有漏选的，默认是0（暂无验证漏选）
+					var checkValue = $(this).children('input:radio:checked').val();
+					if(isEmpty(checkValue)){
+						flag = false;
+						return false;//中断循环
+					}
+					colValue = checkValue;
+
+					cpData.sheetId = sheetId;
+					cpData.activityId = activityId;
+					cpData.columnId = colId;
+					cpData.columnTitle = colTitle;
+					cpData.columnValue = colValue;
+					cpData.columnSort = index+1;
+					cpData.rankId = rankId;
+					cpData.objUserId = objUserId;
+					cpData.objDeptId = objDeptId;
+					allCpData.push(cpData);
+				})
+				return flag;
+			}
+
+			//以上拼接所有数据结束后，保存
+			function saveAllCpData() {
+				allParam.cpInfoListStr = JSON.stringify(allCpData);
+				$.ajax({
+					type:"post",
+					url : ctx + 'userbackground/cpStatisResult/batchSaveCpInfoResult',
+					data : allParam,
+					async:false,
+					success:function(data){
+						if(data.code == 0){
+							// window.location = ctx + "kp/finishSubmit";
+							var dataParam = jQuery.param(allParam1);//转参数格式
+							location.href = ctx + 'kp/selectSheetPage1?'+dataParam;
+						}else {
+							$.modal.alertError('提交失败，需重新测评');
+						}
+					}
+				})
+			}
+
+
+
+			var groupTitleObj = {};//分组名称
+			//初始化选项行
+			function findColumnDataInfo(){
+				var columnDataList = listColDataBySheetId();//获取column_data
+				var evaItemList = listEvaItemBySheetId();//获取eva_item
+
+				$.each(columnDataList,function(index,colData){
+					var groupTitle = colData.groupTitle;
+					if(!isEmpty(groupTitle)) {
+						var len = Object.keys(groupTitleObj).length;
+						if(isEmpty(groupTitleObj[groupTitle])) {
+							groupTitleObj[groupTitle] = len+1;
+							//新加分组的框框
+							listGroupXuanxiang(colData,evaItemList,len+1,index);//显示分组的项
+						}else{
+							//已存在分组框，只需添加项
+							len = groupTitleObj[groupTitle];
+							forAddEvaItem(colData,evaItemList,len,index);
+						}
+					}else{
+						listXuanxiang(colData,evaItemList,index);//显示单项
+					}
+				})
+			}
+
+			//获取column_data
+			function listColDataBySheetId(){
+				var columnDataList = [];
+				$.ajax({
+					type:"post",
+					url: ctx + "userbackground/columnData/listColDataBySheetId",
+					data:{
+						sheetId:sheetId,
+					},
+					async:false,
+					success:function(data){
+						columnDataList = data;
+					}
+				})
+				return columnDataList;
+			}
+
+			//获取eva_item
+			function listEvaItemBySheetId(){
+				var evaItemList = [];
+				$.ajax({
+					type:"post",
+					url: ctx + "userbackground/evaluateItem/listEvaItemBySheetId",
+					data:{
+						sheetId:sheetId,
+					},
+					async:false,
+					success:function(data){
+						evaItemList = data;
+					}
+				})
+				return evaItemList;
+			}
+
+			//显示单项
+			function listXuanxiang(colData,evaItemList,colIndex){
+				var str = '<div class="cp-item">';
+				str += '<div class="cp-title">';
+				str += '<p>'+colData.columnTitle+'</p>';
+				str += '</div>';
+
+				str += '<div class="pf-item" id="'+colData.columnDataId+'" name="'+colData.columnTitle+'">';
+				$.each(evaItemList,function(index,evaItem){
+					if(evaItem.columnDataId == colData.columnDataId && isEmpty(evaItem.groupTitle)){
+						str += '<input type="radio" name="columnValue-'+colIndex+'" value="'+evaItem.evaluateData+'" title="'+evaItem.evaluateValue+'"><span>'+evaItem.evaluateValue+'</span>';
+					}
+				})
+				str += '</div>';
+				str += '</div>';
+				$(".col-data-info").append(str);
+			}
+
+			//显示分组的项
+			function listGroupXuanxiang(colData,evaItemList,len,colIndex){
+				var groupTitle = colData.groupTitle;
+				var str = '<div class="item-group">';
+				str += '<div class="item-hd">'+groupTitle+'</div>';
+				str += '<div class="cp-item group_col_'+len+'">';
+
+
+				str += '<div class="cp-title">';
+				str += '<p>'+colData.columnTitle+'</p>';
+				str += '</div>';
+
+				str += '<div class="pf-item" id="'+colData.columnDataId+'" name="'+colData.columnTitle+'">';
+				$.each(evaItemList,function(index,evaItem){
+					if(evaItem.columnDataId == colData.columnDataId){
+						str += '<input type="radio" name="columnValue-'+colIndex+'" value="'+evaItem.evaluateData+'" title="'+evaItem.evaluateValue+'"><span>'+evaItem.evaluateValue+'</span>';
+					}
+
+				})
+				str += '</div>';
+				str += '</div>';//group_col_的div
+
+				str += '</div>';//item-group的div
+
+				$(".col-data-info").append(str);
+			}
+
+			//已存在分组框，只需添加项
+			function forAddEvaItem(colData,evaItemList,len,colIndex){
+				var str = '<div class="cp-title">';
+				str += '<p>'+colData.columnTitle+'</p>';
+				str += '</div>';
+
+				str += '<div class="pf-item" id="'+colData.columnDataId+'" name="'+colData.columnTitle+'">';
+				$.each(evaItemList,function(index,evaItem){
+					if(evaItem.columnDataId == colData.columnDataId){
+						str += '<input type="radio" name="columnValue-'+colIndex+'" value="'+evaItem.evaluateData+'" title="'+evaItem.evaluateValue+'"><span>'+evaItem.evaluateValue+'</span>';
+					}
+
+				})
+				str += '</div>';
+				$(".group_col_"+len).append(str);
+			}
+		</script>
+	</body>
+</html>
