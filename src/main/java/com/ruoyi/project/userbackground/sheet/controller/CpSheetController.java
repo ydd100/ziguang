@@ -88,7 +88,7 @@ public class CpSheetController extends BaseController {
 	 */
 	@GetMapping("/add")
 	public String add() {
-		return prefix + "/addEvaltable";
+		return prefix + "/addEvaltable1";
 	}
 
 	/**
