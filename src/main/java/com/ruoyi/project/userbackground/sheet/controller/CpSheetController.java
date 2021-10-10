@@ -164,7 +164,8 @@ public class CpSheetController extends BaseController {
 	 */
 	@PostMapping("/uploadFile")
 	@ResponseBody
-	public AjaxResult uploadFile(MultipartFile file,Long sheetId,String pathType,HttpServletRequest request) throws Exception {
+//	public AjaxResult uploadFile(MultipartFile file,Long sheetId,String pathType,HttpServletRequest request) throws Exception {
+	public String uploadFile(MultipartFile file,Long sheetId,String pathType,HttpServletRequest request) throws Exception {
 //		String filePath = RuoYiConfig.getImgPath(request);
 		String aaafile = RuoYiConfig.getProfile()+"/img/evaImg/";
 
@@ -179,7 +180,7 @@ public class CpSheetController extends BaseController {
         	newFile.mkdir();
         }
         file.transferTo(newFile);
-        CpSheet cpSheet = new CpSheet();
+        /*CpSheet cpSheet = new CpSheet();
         cpSheet.setId(sheetId);
         if("cover".equals(pathType)) {
 //        	String coverPath = "/img/evaImg/"+fileName;
@@ -192,7 +193,8 @@ public class CpSheetController extends BaseController {
 
         	cpSheet.setBackPath(backPath);
         }
-        return toAjax(cpSheetService.updateCpSheet(cpSheet));
+        return toAjax(cpSheetService.updateCpSheet(cpSheet));*/
+		return "/profile/img/evaImg/"+fileName;
 		
 	}
 	
