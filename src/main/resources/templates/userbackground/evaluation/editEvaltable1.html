@@ -9,34 +9,35 @@
 </head>
 <body class="white-bg" style="background-color:#F5F6F8">
 <div class="tab-content ">
+    <input type="hidden" id="sheetId" name="id" th:value="${cpSheet.id}">
     <div class="panel-body" style="padding: 2% 10% 0 15%;">
-        <form id="form-sheet-add" class="">
+        <form id="form-sheet-add" th:object="${cpSheet}">
             <div class="form-group">
                 <label class="col-sm-12 control-label">标题 </label>
                 <div class="col-sm-12" style="margin: -4% 0 0 14%;width: 80%">
-                    <input name="name" class="form-control" type="text" placeholder="请输入"
+                    <input th:field="*{name}" class="form-control" type="text" placeholder="请输入"
                            autocomplete="off">
                 </div>
             </div>
             <div class="form-group">
                 <label class="col-sm-12 control-label m-t">填表说明 </label>
                 <div class="col-sm-12"  style="margin: -4% 0 0 14%;width: 80%">
-                    <textarea name="tableExplain" class="form-control"
-                              style=" height: 76px; resize:none;"></textarea>
+                    <textarea th:field="*{tableExplain}" class="form-control" style=" height: 76px; resize:none;"></textarea>
+
                 </div>
             </div>
             <div class="form-group">
                 <label class="col-sm-12 control-label m-t">对象类别 </label>
                 <div class="col-sm-12" style="margin: -4% 0 0 14%;width: 80%">
-                    <input type="radio" name="objType" value="1" title="单位/部门" checked><span>单位/部门</span>
-                    <input type="radio" name="objType" value="0" title="个人"><span>个人</span>
+                    <input type="radio" name="objType" value="1" th:checked="${cpSheet.objType== '1' ? true:false}" title="单位/部门"><span>单位/部门</span>
+                    <input type="radio" name="objType" value="0" th:checked="${cpSheet.objType== '0' ? true:false}" title="个人"><span>个人</span>
                 </div>
             </div>
             <div class="form-group">
                 <label class="col-sm-12 control-label m-t">评价类型 </label>
                 <div class="col-sm-12" style="margin: -4% 0 0 14%;width: 80%">
-                    <input type="radio" name="evaType" value="0" title="正向测评" checked><span>正向测评</span>
-                    <input type="radio" name="evaType" value="1" title="反向测评"><span>反向测评</span>
+                    <input type="radio" name="evaType" value="0" th:checked="${cpSheet.evaType== '0' ? true:false}" title="正向测评"><span>正向测评</span>
+                    <input type="radio" name="evaType" value="1" th:checked="${cpSheet.evaType== '1' ? true:false}" title="反向测评"><span>反向测评</span>
                 </div>
             </div>
         </form>
@@ -88,6 +89,7 @@
 <th:block th:include="include :: footer"/>
 <script th:inline="javascript">
     var prefix = ctx + "userbackground/evaluation"
+
     //验证设置信息
     $("#form-sheet-add").validate({
         focusCleanup: true,
@@ -149,6 +151,7 @@
         obj.coverPath = $("#returnCoverPath").val();
         obj.backPath = $("#returnBackPath").val();
         obj.subjectPath = $("#subjectPath").val();
+        obj.id = $("#sheetId").val();
         if ($("#form-sheet-add").valid()) {
             $.ajax({
                 type:"post",

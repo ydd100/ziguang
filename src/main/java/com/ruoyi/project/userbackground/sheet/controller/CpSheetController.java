@@ -116,7 +116,14 @@ public class CpSheetController extends BaseController {
 	public String edit(Long id, ModelMap mmap) {
 		CpSheet cpSheet = cpSheetService.selectCpSheetById(id);
 		mmap.put("cpSheet", cpSheet);
-		return prefix + "/editEvaltable";
+		return prefix + "/editEvaltable1";
+	}
+
+	@GetMapping("/setitems")
+	public String setitems(Long id, ModelMap mmap) {
+		CpSheet cpSheet = cpSheetService.selectCpSheetById(id);
+		mmap.put("cpSheet", cpSheet);
+		return prefix + "/setitems";
 	}
 
 	/**
@@ -165,7 +172,7 @@ public class CpSheetController extends BaseController {
 	@PostMapping("/uploadFile")
 	@ResponseBody
 //	public AjaxResult uploadFile(MultipartFile file,Long sheetId,String pathType,HttpServletRequest request) throws Exception {
-	public String uploadFile(MultipartFile file,Long sheetId,String pathType,HttpServletRequest request) throws Exception {
+	public AjaxResult uploadFile(MultipartFile file,String pathType,HttpServletRequest request) throws Exception {
 //		String filePath = RuoYiConfig.getImgPath(request);
 		String aaafile = RuoYiConfig.getProfile()+"/img/evaImg/";
 
@@ -194,7 +201,8 @@ public class CpSheetController extends BaseController {
         	cpSheet.setBackPath(backPath);
         }
         return toAjax(cpSheetService.updateCpSheet(cpSheet));*/
-		return "/profile/img/evaImg/"+fileName;
+		String aaapath = "/profile/img/evaImg/"+fileName;
+		return AjaxResult.success(aaapath);
 		
 	}
 	
