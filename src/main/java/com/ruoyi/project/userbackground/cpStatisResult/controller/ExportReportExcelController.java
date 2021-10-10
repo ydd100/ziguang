@@ -6,7 +6,7 @@ import com.ruoyi.project.userbackground.cpStatisResult.service.ICpStatisResultSe
 import com.ruoyi.project.userbackground.sheet.domain.CpSheet;
 import com.ruoyi.project.userbackground.sheet.service.ICpSheetService;
 import org.apache.poi.hssf.usermodel.*;
-import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,7 +68,7 @@ public class ExportReportExcelController {
         XSSFWorkbook hWorkbook = new XSSFWorkbook();
 
         try {
-            XSSFCellStyle cellStyle = hWorkbook.createCellStyle();
+            XSSFCellStyle cellStyle = setCellStyle(hWorkbook);
 
             hWorkbook.createSheet(cpSheet.getName() + "统计结果");
             // 添加表头, 创建第一行
@@ -160,27 +160,33 @@ public class ExportReportExcelController {
             XSSFCell row1celln = newRow1.createCell(row2FirstCol);
             row1celln.setCellStyle(cellStyle);
             row1celln.setCellValue(colMap.get("columnTitle").toString()+"("+colMap.get("allV").toString()+")");
+            cellStyle.setFillForegroundColor(new XSSFColor(new java.awt.Color(119, 155, 192)));//设置背景色
+            row1celln.setCellStyle(cellStyle);
 
             sheet.setColumnWidth(row2FirstCol,(colMap.get("columnTitle").toString()+"("+colMap.get("allV").toString()+")").getBytes().length*2*256);
 
             //最后两列（成绩总计，名次总计）
             if(j == colList.size()-1){
                 //成绩总计并2行
-                CellRangeAddress region3 = new CellRangeAddress(0, 1, row1FirstCol, row1FirstCol+1);// 下标从0开始 起始行号，终止行号， 起始列号，终止列号
+                CellRangeAddress region3 = new CellRangeAddress(0, 1, row1FirstCol, row1FirstCol);// 下标从0开始 起始行号，终止行号， 起始列号，终止列号
                 sheet.addMergedRegion(region3);
                 //名次总计合并2行
-                CellRangeAddress region4 = new CellRangeAddress(0, 1, row1FirstCol+2, row1FirstCol+3);// 下标从0开始 起始行号，终止行号， 起始列号，终止列号
+                CellRangeAddress region4 = new CellRangeAddress(0, 1, row1FirstCol+1, row1FirstCol+1);// 下标从0开始 起始行号，终止行号， 起始列号，终止列号
                 sheet.addMergedRegion(region4);
 
                 //成绩总计
                 XSSFCell row1CjCell = newRow1.createCell(row2FirstCol+1);
                 row1CjCell.setCellStyle(cellStyle);
                 row1CjCell.setCellValue("成绩总计");
+                cellStyle.setFillForegroundColor(new XSSFColor(new java.awt.Color(119, 155, 192)));//设置背景色
+                row1CjCell.setCellStyle(cellStyle);
 
                 //名次总计
                 XSSFCell row1McCell = newRow1.createCell(row2FirstCol+2);
                 row1McCell.setCellStyle(cellStyle);
                 row1McCell.setCellValue("名次总计");
+                cellStyle.setFillForegroundColor(new XSSFColor(new java.awt.Color(119, 155, 192)));//设置背景色
+                row1McCell.setCellStyle(cellStyle);
 
             }
             //第二行职级（加权分）
@@ -191,6 +197,8 @@ public class ExportReportExcelController {
                 XSSFCell row2celln = newRow2.createCell(row2FirstCol);
                 row2celln.setCellStyle(cellStyle);
                 row2celln.setCellValue(rankMap.get("rankName").toString());
+                cellStyle.setFillForegroundColor(new XSSFColor(new java.awt.Color(76, 103, 158)));//设置背景色
+                row2celln.setCellStyle(cellStyle);
 
                 //第3行数据之后循环
                 int startHs = 2;//从行3开始
@@ -203,22 +211,28 @@ public class ExportReportExcelController {
                         XSSFCell cell1 = newRow.createCell(0);
                         cell1.setCellStyle(cellStyle);
                         cell1.setCellValue(valueMap.get("objUserId").toString());
+                        cellStyle.setFillForegroundColor(new XSSFColor(new java.awt.Color(154, 177, 221)));//设置背景色
+                        cell1.setCellStyle(cellStyle);
 
                         // 第二列：名称
                         XSSFCell cell2 = newRow.createCell(1);
                         cell2.setCellStyle(cellStyle);
                         cell2.setCellValue(valueMap.get("objUserName").toString());
+                        cellStyle.setFillForegroundColor(new XSSFColor(new java.awt.Color(192, 210, 240)));//设置背景色
+                        cell2.setCellStyle(cellStyle);
 
                         // 第三列：加权分
                         XSSFCell cell3 = newRow.createCell(2);
                         cell3.setCellStyle(cellStyle);
                         cell3.setCellValue(valueMap.get(columnId+"_"+rankId+"_jq").toString());
+
                     }else {
                         XSSFRow newRow = sheet.getRow(startHs);
                         // 第三列：加权分
                         XSSFCell cell3n = newRow.createCell(row2FirstCol);
                         cell3n.setCellStyle(cellStyle);
                         cell3n.setCellValue(valueMap.get(columnId+"_"+rankId+"_jq").toString());
+
 
                         //最后两列（成绩总计，名次总计）
                         if(j == colList.size()-1){
@@ -227,11 +241,15 @@ public class ExportReportExcelController {
                             XSSFCell cellCj = newRow.createCell(row2FirstCol+1);
                             cellCj.setCellStyle(cellStyle);
                             cellCj.setCellValue(valueMap.get("jqzj").toString());
+                            cellStyle.setFillForegroundColor(new XSSFColor(new java.awt.Color(112, 143, 197, 255)));//设置背景色
+                            row1celln.setCellStyle(cellStyle);
 
                             // 名次总计列
                             XSSFCell cellMc = newRow.createCell(row2FirstCol+2);
                             cellMc.setCellStyle(cellStyle);
                             cellMc.setCellValue("0");
+                            cellStyle.setFillForegroundColor(new XSSFColor(new java.awt.Color(112, 143, 197)));//设置背景色
+                            row1celln.setCellStyle(cellStyle);
                         }
 
                     }
@@ -246,18 +264,18 @@ public class ExportReportExcelController {
 
     }
 
-    public void setCellStyle(XSSFWorkbook hWorkbook){
+    public XSSFCellStyle setCellStyle(XSSFWorkbook hWorkbook){
         XSSFCellStyle cellStyle = hWorkbook.createCellStyle();
-//        cellStyle.setAlignment(CellStyle.class.);//左右居中
-//        cellStyle.setVerticalAlignment(sxjz);//上下居中
-//        cellStyle.setBorderBottom(CellStyle.BORDER_THIN); // 下边框
-//        cellStyle.setBorderLeft(CellStyle.BORDER_THIN);// 左边框
-//        cellStyle.setBorderTop(CellStyle.BORDER_THIN);// 上边框
-//        cellStyle.setBorderRight(CellStyle.BORDER_THIN);// 右边框
+        cellStyle.setAlignment(HorizontalAlignment.CENTER);
+        cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        cellStyle.setBorderBottom(BorderStyle.THIN); // 下边框
+        cellStyle.setBorderLeft(BorderStyle.THIN);// 左边框
+        cellStyle.setBorderTop(BorderStyle.THIN);// 上边框
+        cellStyle.setBorderRight(BorderStyle.THIN);// 右边框
 //        cellStyle.setFillForegroundColor(new XSSFColor(new java.awt.Color(156, 195, 230)));//设置背景色
-//        cellStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);//填充模式
+        cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);//填充模式
 
-
+        return cellStyle;
 
     }
 }
