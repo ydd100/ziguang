@@ -139,7 +139,7 @@ public class CpStatisResultServiceImpl implements ICpStatisResultService
         paramMap.put("activityId",activityId);
         paramMap.put("sheetId",sheetId);
         //1.查询表格项
-        List<Map<String, Object>> colList = cpStatisResultMapper.selectColListByActIdShId(paramMap);
+        List<Map<String, Object>> colList = cpStatisResultMapper.selectColListByShId(paramMap);
         resultMap.put("colList",colList);//项名称
 
         //判断是否开启职级(1开启0关闭)
@@ -153,6 +153,7 @@ public class CpStatisResultServiceImpl implements ICpStatisResultService
             Map<String,Object> valueMap = new HashMap<String,Object>();
             List<Object> deptList = new ArrayList<Object>();//加入部门id，为了下方循环拼接的数据格式
             Double zj = 0D;
+            Double jqzj = 0D;//加权总计
             for (int i = 0;i < deptResultList.size();i++) {
                 Map<String, Object> deptResultMap = deptResultList.get(i);
 
@@ -160,8 +161,10 @@ public class CpStatisResultServiceImpl implements ICpStatisResultService
                     deptList.add(deptResultMap.get("objDeptId"));
                     if (valueMap.size() > 0) {//第一次添加时，valueMap是空集合
                         valueMap.put("zj",df.format(zj));
+                        valueMap.put("jqzj",df.format(jqzj));
                         valueMapList.add(valueMap);//循环到新的部门了，将上一个部门加添加list里
                         zj = 0D;
+                        jqzj = 0D;
                     }
 
                     valueMap = new HashMap<String,Object>();//新定义对象
@@ -178,12 +181,15 @@ public class CpStatisResultServiceImpl implements ICpStatisResultService
                 //加权分
                 String jqKey = deptResultMap.get("columnId") + "_" + deptResultMap.get("rankId") + "_jq";
                 valueMap.put(jqKey,deptResultMap.get("jqValue"));
+                jqzj += Double.parseDouble(deptResultMap.get("jqValue").toString());
 
                 //判断是不是最后一条数据，如果是最后一条，将valuefMap保存到list里
                 if (i == deptResultList.size()-1) {
                     valueMap.put("zj",df.format(zj));
+                    valueMap.put("jqzj",df.format(jqzj));
                     valueMapList.add(valueMap);
                     zj = 0D;
+                    jqzj = 0D;
                 }
 
             }
@@ -198,6 +204,7 @@ public class CpStatisResultServiceImpl implements ICpStatisResultService
             Map<String,Object> valueMap = new HashMap<String,Object>();
             List<Object> deptList = new ArrayList<Object>();//加入部门id，为了下方循环拼接的数据格式
             Double zj = 0D;
+            Double jqzj = 0D;//加权总计
             for (int i = 0;i < deptResultList.size();i++) {
                 Map<String, Object> deptResultMap = deptResultList.get(i);
 
@@ -205,8 +212,10 @@ public class CpStatisResultServiceImpl implements ICpStatisResultService
                     deptList.add(deptResultMap.get("objDeptId"));
                     if (valueMap.size() > 0) {//第一次添加时，valueMap是空集合
                         valueMap.put("zj",df.format(zj));
+                        valueMap.put("jqzj",df.format(jqzj));
                         valueMapList.add(valueMap);//循环到新的部门了，将上一个部门加添加list里
                         zj = 0D;
+                        jqzj = 0D;
                     }
 
                     valueMap = new HashMap<String,Object>();//新定义对象
@@ -223,12 +232,15 @@ public class CpStatisResultServiceImpl implements ICpStatisResultService
                 //加权分
                 String jqKey = deptResultMap.get("columnId") + "_jq";
                 valueMap.put(jqKey,deptResultMap.get("jqValue"));
+                jqzj += Double.parseDouble(deptResultMap.get("jqValue").toString());
 
                 //判断是不是最后一条数据，如果是最后一条，将valuefMap保存到list里
                 if (i == deptResultList.size()-1) {
                     valueMap.put("zj",df.format(zj));
+                    valueMap.put("jqzj",df.format(jqzj));
                     valueMapList.add(valueMap);
                     zj = 0D;
+                    jqzj = 0D;
                 }
 
             }
@@ -253,7 +265,7 @@ public class CpStatisResultServiceImpl implements ICpStatisResultService
         paramMap.put("activityId",activityId);
         paramMap.put("sheetId",sheetId);
         //1.查询表格项
-        List<Map<String, Object>> colList = cpStatisResultMapper.selectColListByActIdShId(paramMap);
+        List<Map<String, Object>> colList = cpStatisResultMapper.selectColListByShId(paramMap);
         resultMap.put("colList",colList);//项名称
 
         //判断是否开启职级(1开启0关闭)
@@ -267,6 +279,7 @@ public class CpStatisResultServiceImpl implements ICpStatisResultService
             Map<String,Object> valueMap = new HashMap<String,Object>();
             List<Object> userList = new ArrayList<Object>();//加入部门id，为了下方循环拼接的数据格式
             Double zj = 0D;
+            Double jqzj = 0D;//加权总计
             for (int i = 0;i < userResultList.size();i++) {
                 Map<String, Object> userResultMap = userResultList.get(i);
 
@@ -274,8 +287,10 @@ public class CpStatisResultServiceImpl implements ICpStatisResultService
                     userList.add(userResultMap.get("objUserId"));
                     if (valueMap.size() > 0) {//第一次添加时，valueMap是空集合
                         valueMap.put("zj",df.format(zj));
+                        valueMap.put("jqzj",df.format(jqzj));
                         valueMapList.add(valueMap);//循环到新的部门了，将上一个部门加添加list里
                         zj = 0D;
+                        jqzj = 0D;
                     }
 
                     valueMap = new HashMap<String,Object>();//新定义对象
@@ -292,12 +307,15 @@ public class CpStatisResultServiceImpl implements ICpStatisResultService
                 //加权分
                 String jqKey = userResultMap.get("columnId") + "_" + userResultMap.get("rankId") + "_jq";
                 valueMap.put(jqKey,userResultMap.get("jqValue"));
+                jqzj += Double.parseDouble(userResultMap.get("jqValue").toString());
 
                 //判断是不是最后一条数据，如果是最后一条，将valuefMap保存到list里
                 if (i == userResultList.size()-1) {
                     valueMap.put("zj",df.format(zj));
+                    valueMap.put("jqzj",df.format(jqzj));
                     valueMapList.add(valueMap);
                     zj = 0D;
+                    jqzj = 0D;
                 }
 
             }
@@ -312,6 +330,7 @@ public class CpStatisResultServiceImpl implements ICpStatisResultService
             Map<String,Object> valueMap = new HashMap<String,Object>();
             List<Object> userList = new ArrayList<Object>();//加入部门id，为了下方循环拼接的数据格式
             Double zj = 0D;
+            Double jqzj = 0D;//加权总计
             for (int i = 0;i < userResultList.size();i++) {
                 Map<String, Object> userResultMap = userResultList.get(i);
 
@@ -319,8 +338,10 @@ public class CpStatisResultServiceImpl implements ICpStatisResultService
                     userList.add(userResultMap.get("objUserId"));
                     if (valueMap.size() > 0) {//第一次添加时，valueMap是空集合
                         valueMap.put("zj",df.format(zj));
+                        valueMap.put("jqzj",df.format(jqzj));
                         valueMapList.add(valueMap);//循环到新的部门了，将上一个部门加添加list里
                         zj = 0D;
+                        jqzj = 0D;
                     }
 
                     valueMap = new HashMap<String,Object>();//新定义对象
@@ -337,12 +358,15 @@ public class CpStatisResultServiceImpl implements ICpStatisResultService
                 //加权分
                 String jqKey = userResultMap.get("columnId") + "_jq";
                 valueMap.put(jqKey,userResultMap.get("jqValue"));
+                jqzj += Double.parseDouble(userResultMap.get("jqValue").toString());
 
                 //判断是不是最后一条数据，如果是最后一条，将valuefMap保存到list里
                 if (i == userResultList.size()-1) {
                     valueMap.put("zj",df.format(zj));
+                    valueMap.put("jqzj",df.format(jqzj));
                     valueMapList.add(valueMap);
                     zj = 0D;
+                    jqzj = 0D;
                 }
 
             }

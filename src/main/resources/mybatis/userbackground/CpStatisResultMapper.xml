@@ -133,10 +133,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <!-- 统计分步骤做start -->
     <!-- 1.查询表格项 -->
-    <select id="selectColListByActIdShId" parameterType="Map" resultType="Map">
-        select column_id columnId,column_title columnTitle from cp_statis_result
-        where activity_id=#{activityId} and sheet_id=#{sheetId}
-        group by column_id,column_title,column_sort order by column_sort*1
+    <select id="selectColListByShId" parameterType="Map" resultType="Map">
+        select cd.column_data_id columnId,cd.column_title columnTitle,sum(ei.evaluate_data) allV
+        from cp_column_data cd
+        left join cp_evaluate_item ei on cd.sheet_id = ei.sheet_id and cd.column_data_id = ei.column_data_id
+        where cd.sheet_id=#{sheetId}
+        group by cd.column_data_id,cd.column_title,cd.column_sort  order by cd.column_sort*1
     </select>
 
     <!-- 2.(活动开启职级)查询测评过的职级 -->

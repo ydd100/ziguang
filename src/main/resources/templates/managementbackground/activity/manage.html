@@ -459,7 +459,7 @@
             var objType = $("#sheetId option:selected").attr("obj-type");//0:个人；1:部门
 
             var valueMapList = data.valueMapList;//数据集合
-            shuju = data.MapList;//为了判断需不需要导出
+            shuju = data.valueMapList;//为了判断需不需要导出
             //组合表头列
             var tableColumn = [];
             if (isnotRank == 1) {
@@ -473,6 +473,7 @@
                 var firstRow = [];//部门和个人只有第二列名称不同，其它可共用
                 if (objType == 1) {
                     firstRow = [{
+                        field : "objUserId",
                         title : "编号",
                         rowspan : 3,
                     },{
@@ -543,6 +544,7 @@
                 var firstRow = [];//部门和个人只有第二列名称不同，其它可共用
                 if (objType == 1) {
                     firstRow = [{
+                        field : "objUserId",
                         title : "编号",
                         rowspan : 2,
                     },{

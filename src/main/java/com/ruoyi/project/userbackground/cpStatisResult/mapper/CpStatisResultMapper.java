@@ -83,7 +83,7 @@ public interface CpStatisResultMapper
      * @param map
      * @return
      */
-    public List<Map<String,Object>> selectColListByActIdShId(Map<String,Object> map);
+    public List<Map<String,Object>> selectColListByShId(Map<String,Object> map);
 
     /**
      * 2.(活动开启职级)查询测评过的职级
